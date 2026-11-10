@@ -1,0 +1,268 @@
+{%- macro unit_symbol(unit) -%}{{ 'kΩ' if unit == 'kohm' else ('Ω' if unit == 'ohm' else '') }}{%- endmacro -%}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BJT DC Bias Calculator (คำนวณ DC Bias ของ BJT)</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <h1>BJT DC Bias Calculator — Common Emitter, Voltage Divider
+    (คำนวณ DC Bias ของ BJT แบบ Common Emitter แบ่งแรงดัน)</h1>
+  <p>ENG29 2121 · Lab 02 · Electronics Laboratory (ปฏิบัติการอิเล็กทรอนิกส์)</p>
+</header>
+
+<div class="wrap">
+  {% if errors %}
+  <p class="errors-title" role="alert">Please fix the following (กรุณาแก้ไขข้อมูลต่อไปนี้)</p>
+  <ul class="errors">
+    {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  <section class="card diagram">
+    <h2>Circuit Diagram (แผนภาพวงจร)</h2>
+    <p class="note diagram-note">
+      Values are filled in by the server together with the results
+      (ค่าบนภาพถูกเติมโดย Python พร้อมกับผลลัพธ์ — ไม่ใช่ JavaScript)
+    </p>
+    <svg viewBox="0 0 760 500" role="img" aria-labelledby="sc-title">
+      <title id="sc-title">Voltage-divider biased NPN transistor circuit with component
+        values and node voltages (แผนภาพวงจรไบแอสแบบแบ่งแรงดัน พร้อมค่าอุปกรณ์และแรงดันที่ node)</title>
+      <defs>
+        <marker id="sc-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#17344b"/>
+        </marker>
+      </defs>
+      <style>
+        .sc-w{stroke:#17344b;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+        .sc-l{font:13px Tahoma,"Leelawadee UI",sans-serif;fill:#17344b}
+        .sc-v{font:13px Tahoma,"Leelawadee UI",sans-serif;fill:#0c8078;font-weight:700}
+        .sc-n{fill:#1d638b}
+        .sc-g{stroke:#17344b;stroke-width:2;stroke-linecap:round}
+        .sc-p{fill:#f5f8fc;stroke:#d3e0ec;stroke-width:1.5}
+      </style>
+
+      <!-- VCC rail -->
+      <path class="sc-w" d="M160,60 H420"/>
+      <circle class="sc-n" cx="160" cy="60" r="3.5"/>
+      <circle class="sc-n" cx="420" cy="60" r="3.5"/>
+      <text class="sc-v" x="160" y="42" text-anchor="middle">VCC = {{ form.vcc }} V</text>
+
+      <!-- R1: VCC to base -->
+      <path class="sc-w" d="M160,60 V100"/>
+      <path class="sc-w" d="M160,100 V106 L150,113 L170,127 L150,141 L170,155 L150,169 L170,183 L160,190 V200"/>
+      <path class="sc-w" d="M160,200 V270"/>
+      <text class="sc-l" x="188" y="155">R1 = {{ form.r1 }} {{ unit_symbol(form.r1_unit) }}</text>
+
+      <!-- base node -->
+      <circle class="sc-n" cx="160" cy="270" r="3.5"/>
+      <path class="sc-w" d="M160,270 H320"/>
+
+      <!-- R2: base to ground -->
+      <path class="sc-w" d="M160,270 V320"/>
+      <path class="sc-w" d="M160,320 V326 L150,333 L170,347 L150,361 L170,375 L150,389 L170,403 L160,410 V420"/>
+      <path class="sc-w" d="M160,420 V450"/>
+      <text class="sc-l" x="188" y="378">R2 = {{ form.r2 }} {{ unit_symbol(form.r2_unit) }}</text>
+      <path class="sc-g" d="M135,450 H185 M145,459 H175 M155,468 H165"/>
+
+      <!-- RC: VCC to collector -->
+      <path class="sc-w" d="M420,60 V100"/>
+      <path class="sc-w" d="M420,100 V106 L410,113 L430,127 L410,141 L430,155 L410,169 L430,183 L420,190 V200"/>
+      <path class="sc-w" d="M420,200 V222"/>
+      <text class="sc-l" x="448" y="155">RC = {{ form.rc }} {{ unit_symbol(form.rc_unit) }}</text>
+
+      <!-- transistor (circle-enclosed NPN symbol) -->
+      <circle cx="350" cy="270" r="52" fill="none" stroke="#17344b" stroke-width="2"/>
+      <path class="sc-w" d="M322,238 V302" stroke-width="3"/>
+      <path class="sc-w" d="M160,270 H322"/>
+      <path class="sc-w" d="M322,248 L372,222"/>
+      <path class="sc-w" d="M372,222 L420,222"/>
+      <path class="sc-w" d="M322,292 L372,318" marker-end="url(#sc-arrow)"/>
+      <path class="sc-w" d="M372,318 L420,340"/>
+      <text class="sc-l" x="330" y="205">β = {{ form.beta }}</text>
+
+      <!-- emitter to RE, then ground -->
+      <path class="sc-w" d="M420,340 V346 L410,353 L430,367 L410,381 L430,395 L410,409 L430,423 L420,430 V440"/>
+      <path class="sc-w" d="M420,440 V450"/>
+      <text class="sc-l" x="448" y="398">RE = {{ form.re }} {{ unit_symbol(form.re_unit) }}</text>
+      <path class="sc-g" d="M395,450 H445 M405,459 H435 M415,468 H425"/>
+
+      {% if result %}
+      <!-- node voltages (computed by the backend) -->
+      <text class="sc-v" x="178" y="300">VB = {{ "%.3f"|format(result.vb) }} V</text>
+      <text class="sc-v" x="448" y="232">VC = {{ "%.3f"|format(result.vc) }} V</text>
+      <text class="sc-v" x="448" y="322">VE = {{ "%.3f"|format(result.ve) }} V</text>
+
+      <!-- computed summary panel -->
+      <rect class="sc-p" x="575" y="90" width="175" height="96" rx="7"/>
+      <text class="sc-v" x="590" y="118">VCE = {{ "%.3f"|format(result.vce) }} V</text>
+      <text class="sc-v" x="590" y="142">IC = {{ "%.3f"|format(result.ic * 1000) }} mA</text>
+      <text class="sc-v" x="590" y="166">IB = {{ "%.3f"|format(result.ib * 1000000) }} µA</text>
+      {% endif %}
+    </svg>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Circuit Parameters (พารามิเตอร์วงจร)</h2>
+
+      <form method="post" action="/calculate">
+        <label for="vcc">VCC — Supply Voltage (แรงดันไฟเลี้ยง)</label>
+        <input id="vcc" type="number" step="any" name="vcc" value="{{ form.vcc }}">
+
+        <label for="r1">R1 — VCC to Base (ตัวต้านทานจาก VCC ไป Base)</label>
+        <div class="row">
+          <input id="r1" type="number" step="any" name="r1" value="{{ form.r1 }}">
+          <select name="r1_unit" aria-label="R1 unit (หน่วยของ R1)">
+            <option value="kohm"{% if form.r1_unit == 'kohm' %} selected{% endif %}>kΩ</option>
+            <option value="ohm"{% if form.r1_unit == 'ohm' %} selected{% endif %}>Ω</option>
+          </select>
+        </div>
+
+        <label for="r2">R2 — Base to Ground (ตัวต้านทานจาก Base ไป Ground)</label>
+        <div class="row">
+          <input id="r2" type="number" step="any" name="r2" value="{{ form.r2 }}">
+          <select name="r2_unit" aria-label="R2 unit (หน่วยของ R2)">
+            <option value="kohm"{% if form.r2_unit == 'kohm' %} selected{% endif %}>kΩ</option>
+            <option value="ohm"{% if form.r2_unit == 'ohm' %} selected{% endif %}>Ω</option>
+          </select>
+        </div>
+
+        <label for="rc">RC — VCC to Collector (ตัวต้านทานจาก VCC ไป Collector)</label>
+        <div class="row">
+          <input id="rc" type="number" step="any" name="rc" value="{{ form.rc }}">
+          <select name="rc_unit" aria-label="RC unit (หน่วยของ RC)">
+            <option value="kohm"{% if form.rc_unit == 'kohm' %} selected{% endif %}>kΩ</option>
+            <option value="ohm"{% if form.rc_unit == 'ohm' %} selected{% endif %}>Ω</option>
+          </select>
+        </div>
+
+        <label for="re">RE — Emitter to Ground (ตัวต้านทานจาก Emitter ไป Ground)</label>
+        <div class="row">
+          <input id="re" type="number" step="any" name="re" value="{{ form.re }}">
+          <select name="re_unit" aria-label="RE unit (หน่วยของ RE)">
+            <option value="kohm"{% if form.re_unit == 'kohm' %} selected{% endif %}>kΩ</option>
+            <option value="ohm"{% if form.re_unit == 'ohm' %} selected{% endif %}>Ω</option>
+          </select>
+        </div>
+
+        <label for="beta">β — Current Gain (อัตราขยายกระแส hFE)</label>
+        <input id="beta" type="number" step="any" name="beta" value="{{ form.beta }}">
+
+        <label for="vbe">VBE — Base–Emitter Voltage (แรงดัน Base–Emitter)</label>
+        <input id="vbe" type="number" step="any" name="vbe" value="{{ form.vbe }}">
+
+        <button type="submit">Calculate DC Bias (คำนวณ DC Bias)</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>DC Bias Results (ผลลัพธ์ DC Bias)</h2>
+      {% if result %}
+        {% if result.region == 'active' %}
+        <span class="badge ok">Forward Active (ช่วงขยาย)</span>
+        <div class="status ok">
+          <strong>✅ Active Region Approximation OK (การประมาณช่วงขยายใช้ได้)</strong>
+          <span>
+            VCE = {{ "%.3f"|format(result.vce) }} V is above VCE(sat) =
+            {{ "%.1f"|format(vce_sat) }} V, so the transistor is in the forward-active
+            region and the DC bias equations apply.
+            (ทรานซิสเตอร์อยู่ในช่วงขยาย ค่า VCE สูงกว่า VCE(sat) สมการ DC bias ที่ใช้จึงใช้ได้)
+          </span>
+        </div>
+        {% elif result.region == 'cutoff' %}
+        <span class="badge warn">Cutoff (ตัด)</span>
+        <div class="status warn">
+          <strong>⚠ Active Region Approximation Does Not Apply (ใช้ไม่ได้)</strong>
+          <span>
+            VTH = {{ "%.3f"|format(result.vth) }} V is not above VBE =
+            {{ "%.3f"|format(form.vbe|float) }} V, so the base–emitter junction is not
+            forward biased and the transistor is cut off.
+            (VTH ไม่สูงกว่า VBE ขา Base–Emitter ไม่นำ จึงอยู่ในช่วงตัด)
+          </span>
+        </div>
+        {% else %}
+        <span class="badge warn">Saturation (อิ่มตัว)</span>
+        <div class="status warn">
+          <strong>⚠ Active Region Approximation Does Not Apply (ใช้ไม่ได้)</strong>
+          <span>
+            VCE = {{ "%.3f"|format(result.vce) }} V is below VCE(sat) =
+            {{ "%.1f"|format(vce_sat) }} V, so the transistor is saturated.
+            (VCE ต่ำกว่า VCE(sat) ทรานซิสเตอร์อิ่มตัว)
+          </span>
+        </div>
+        {% endif %}
+
+        {% for w in result.warnings %}
+        <p class="warnbox">⚠ {{ w }}</p>
+        {% endfor %}
+
+        {% if result.region != 'active' %}
+        <p class="warnbox">Values shown are estimates only — do not use them to make
+          decisions (ค่าที่แสดงเป็นเพียงการประมาณ — อย่าใช้ตัดสินใจ)</p>
+        {% endif %}
+
+        <table>
+          <thead>
+            <tr>
+              <th>Quantity (ปริมาณ)</th>
+              <th class="val">Value (ค่า)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>VB — Base Voltage (แรงดัน Base)</td>
+              <td class="val">{{ "%.3f"|format(result.vb) }} V</td>
+            </tr>
+            <tr>
+              <td>VE — Emitter Voltage (แรงดัน Emitter)</td>
+              <td class="val">{{ "%.3f"|format(result.ve) }} V</td>
+            </tr>
+            <tr>
+              <td>VC — Collector Voltage (แรงดัน Collector)</td>
+              <td class="val">{{ "%.3f"|format(result.vc) }} V</td>
+            </tr>
+            <tr>
+              <td><strong>VCE — Collector–Emitter Voltage (แรงดัน Collector–Emitter)</strong></td>
+              <td class="val"><strong>{{ "%.3f"|format(result.vce) }} V</strong></td>
+            </tr>
+            <tr>
+              <td><strong>IC — Collector Current (กระแส Collector)</strong></td>
+              <td class="val"><strong>{{ "%.3f"|format(result.ic * 1000) }} mA</strong></td>
+            </tr>
+            <tr>
+              <td>IB — Base Current (กระแส Base)</td>
+              <td class="val">{{ "%.3f"|format(result.ib * 1000000) }} µA</td>
+            </tr>
+            <tr>
+              <td>IE — Emitter Current (กระแส Emitter)</td>
+              <td class="val">{{ "%.3f"|format(result.ie * 1000) }} mA</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="note">
+          <strong>Assumptions (สมมติฐาน):</strong> Forward-Active approximation
+          (แบบจำลองช่วงขยาย) — constant β (β คงที่ = {{ form.beta }}), constant VBE
+          (VBE คงที่ = {{ form.vbe }} V), no Early effect (ไม่คิด Early effect).
+          Not a SPICE result (ไม่ใช่ผลจาก SPICE).<br>
+          VTH = {{ "%.3f"|format(result.vth) }} V · RTH = {{ "%.3f"|format(result.rth / 1000) }} kΩ
+        </p>
+      {% else %}
+        <p class="placeholder">
+          Enter the circuit parameters and press
+          <strong>Calculate DC Bias (คำนวณ DC Bias)</strong>
+          to see the results (กรอกค่าพารามิเตอร์แล้วกด Calculate DC Bias เพื่อดูผลลัพธ์)
+        </p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+
+<footer>ENG29 2121 · BJT DC Bias Calculator · Results computed by Python (ผลลัพธ์คำนวณด้วย Python)</footer>
+</body>
+</html>

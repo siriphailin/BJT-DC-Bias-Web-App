@@ -22,6 +22,7 @@
 - ค่าคงที่: `VCE_SAT = 0.3` V, `VBE_MIN = 0.0`, `VBE_MAX = 1.0`
 - แสดงแรงดัน 3 ตำแหน่งทศนิยม, กระแสเป็น mA 3 ตำแหน่ง (IB แสดง µA ด้วย)
 - Commit ทำผ่าน **GitHub Desktop** (ผู้ใช้กดเอง) — ไม่ใช้ `git commit` ในเทอร์มินัล
+- **ภาษาของ UI: อังกฤษเป็นหลัก มีไทยในวงเล็บ** เช่น `VCE — Collector–Emitter Voltage (แรงดัน Collector–Emitter)`, `R1 must be greater than 0 (R1 ต้องมากกว่า 0)`, `Calculate DC Bias (คำนวณ DC Bias)` — ใช้กับ label, ปุ่ม, หัวข้อ, ข้อความ error และ warning ทั้งหมด
 - ห้าม commit `.venv/`, `__pycache__/`, `.env`
 
 ## Review Focus
@@ -351,7 +352,7 @@ def calculate():
 กติกาที่ต้องทำตาม:
 - อ่านค่าจาก `request.form` โดยใช้ `form.get(name, "")`; ถ้าฟิลด์หายไปให้ถือเป็นค่าว่าง
 - แปลง `vcc`, `beta`, `vbe` ด้วย `float()`; แปลงตัวต้านทานด้วย `parse_resistance(raw, unit)`
-- เก็บ error ทุกข้อใน list `errors` (ข้อความภาษาไทยที่ระบุชื่อช่อง เช่น `"R1 ต้องมากกว่า 0"`) แล้ว `render_template("index.html", form=submitted, result=None, errors=errors)` พร้อม status **400**
+- เก็บ error ทุกข้อใน list `errors` (ข้อความสองภาษา อังกฤษนำ + ไทยในวงเล็บ ระบุชื่อช่อง เช่น `"R1 must be greater than 0 (R1 ต้องมากกว่า 0)"`) แล้ว `render_template("index.html", form=submitted, result=None, errors=errors)` พร้อม status **400**
 - ถ้าผ่าน: `calculate_dc_bias(...)` → `render_template(..., result=result, errors=[])` status 200
 - `BiasInputError` ต้องถูกจับ ไม่ให้หลุดเป็น 500; `ValueError` จากการ `float()` ก็จับเช่นกัน
 - ส่ง `form` ที่ผู้ใช้กรอกกลับไปเพื่อคงค่า (D9)
@@ -379,7 +380,8 @@ def calculate():
 - ช่อง `r1, r2, rc, re` เป็น `input type="number" step="any"` คู่กับ `<select name="<field>_unit">` ที่มี `<option value="kohm">kΩ</option>` และ `<option value="ohm">Ω</option>` (เลือกค่าจาก `form[...]` ด้วย `{% if %}`)
 - บล็อก error: `{% if errors %}<ul class="errors">{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}`
 - บล็อกผลลัพธ์ `{% if result %}` แสดง VB, VE, VC, VCE (V) และ IC (mA), IB (µA), IE (mA) โดยใช้ `{{ "%.3f"|format(result.vce) }}` และ `{{ "%.3f"|format(result.ic * 1000) }}`
-- บล็อก warning: `{% for w in result.warnings %}` และถ้า `result.region != 'active'` แสดงข้อความ `ค่าที่แสดงเป็นเพียงการประมาณ — อย่าใช้ตัดสินใจ`
+- บล็อก warning: `{% for w in result.warnings %}` และถ้า `result.region != 'active'` แสดงข้อความ `Values shown are estimates only — do not use them to make decisions (ค่าที่แสดงเป็นเพียงการประมาณ — อย่าใช้ตัดสินใจ)`
+- ป้ายกำกับทุกตัวเป็นสองภาษา (อังกฤษนำ ไทยในวงเล็บ) ตาม Global Constraints; ชื่อปริมาณคงรูปสัญลักษณ์เดิม (`VB`, `VCE`, `IC`, …)
 
 - [ ] **Step 5: เขียน `static/style.css`**
 

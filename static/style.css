@@ -1,0 +1,141 @@
+:root{
+  --navy:#103658; --blue:#1d638b; --teal:#0c8078; --paper:#f5f8fc;
+  --ink:#17344b; --muted:#546d83; --line:#d3e0ec;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:Tahoma,"Leelawadee UI",sans-serif;
+  font-size:16px;
+  line-height:1.6;
+}
+
+header{
+  background:linear-gradient(115deg,#0c304f,#20577d 70%,#0c6e79);
+  color:#fff;
+  padding:26px 24px;
+}
+header h1{margin:0 0 6px;font-size:1.45rem;line-height:1.35}
+header p{margin:0;color:#ddf0fd;font-size:.92rem}
+
+.wrap{max-width:1120px;margin:0 auto;padding:22px 20px 48px}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+
+.card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:20px 22px;
+}
+.card h2{margin:0 0 14px;font-size:1.05rem;color:#113c60}
+
+/* Circuit diagram */
+.diagram{margin:0 0 18px}
+.diagram svg{width:100%;height:auto;display:block;max-width:760px;margin:0 auto}
+.diagram-note{margin:0 0 8px}
+
+/* Form */
+form{margin:0}
+label{display:block;font-size:.85rem;color:var(--muted);margin:12px 0 4px}
+.row{display:flex;gap:8px}
+input,select{
+  width:100%;
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  font:inherit;
+  color:var(--ink);
+  background:#fff;
+}
+select{width:88px;flex:none}
+input:focus,select:focus{outline:2px solid #9dc4e0;outline-offset:1px}
+
+button{
+  margin-top:18px;
+  width:100%;
+  padding:11px;
+  border:0;
+  border-radius:6px;
+  background:var(--blue);
+  color:#fff;
+  font:inherit;
+  font-weight:700;
+  cursor:pointer;
+}
+button:hover{background:#17516f}
+
+/* Results */
+.badge{
+  display:inline-block;
+  font-size:.78rem;
+  font-weight:700;
+  padding:4px 10px;
+  border-radius:999px;
+  margin-bottom:12px;
+}
+.badge.ok{background:#e9f6f2;color:#0f6b5c;border:1px solid #9ed5c8}
+.badge.warn{background:#fffbe6;color:#7a5a00;border:1px solid #e8d48a}
+
+/* Region status block */
+.status{
+  border-radius:7px;
+  padding:10px 14px;
+  margin:0 0 14px;
+  font-size:.88rem;
+  line-height:1.55;
+}
+.status strong{display:block;font-size:.95rem;margin-bottom:3px}
+.status span{display:block}
+.status.ok{background:#e9f6f2;border:1px solid #9ed5c8;border-left:4px solid #0f8a72;color:#0d5a4d}
+.status.warn{background:#fffbe6;border:1px solid #e8d48a;border-left:4px solid #c9971f;color:#6b4e00}
+
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+th{background:#e6f1fa;color:#123e5c;font-weight:700}
+th.val,td.val{text-align:right;font-variant-numeric:tabular-nums}
+.note{font-size:.82rem;color:var(--muted);margin-top:12px}
+
+/* Errors and warnings */
+.errors-title{
+  margin:0 0 6px;
+  font-size:.88rem;
+  font-weight:700;
+  color:#8c2b22;
+}
+.errors{
+  background:#fdeceb;
+  border:1px solid #e8b4b0;
+  border-radius:6px;
+  padding:10px 14px 10px 30px;
+  margin:0 0 14px;
+  font-size:.88rem;
+  color:#8c2b22;
+}
+.errors li{margin:2px 0}
+
+.warnbox{
+  background:#fffbe6;
+  border:1px solid #e8d48a;
+  border-left:4px solid #c9971f;
+  padding:10px 14px;
+  border-radius:0 6px 6px 0;
+  margin:0 0 14px;
+  font-size:.88rem;
+  color:#6b4e00;
+}
+
+.placeholder{font-size:.9rem;color:var(--muted);margin:0}
+
+footer{text-align:center;color:var(--muted);font-size:.78rem;padding:18px}
+
+@media (max-width:700px){
+  .grid{grid-template-columns:1fr}
+  header{padding:20px 18px}
+  .wrap{padding:18px 14px 36px}
+  .card{padding:16px 16px}
+}
