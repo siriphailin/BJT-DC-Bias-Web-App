@@ -1,4 +1,4 @@
-{%- macro unit_symbol(unit) -%}{{ 'kΩ' if unit == 'kohm' else ('Ω' if unit == 'ohm' else '') }}{%- endmacro -%}
+{%- macro unit_symbol(unit) -%}{{ 'kΩ' if unit == 'kohm' else ('MΩ' if unit == 'mohm' else ('Ω' if unit == 'ohm' else '')) }}{%- endmacro -%}
 {%- macro resistor(name, label_en, label_th, used) -%}
 <label for="{{ name }}"{% if not used %} class="unused"{% endif %}>{{ label_en }} — {{ label_th }}{% if not used %} <span class="unused-tag">(not used in this mode · ไม่ใช้ในโหมดนี้)</span>{% endif %}</label>
 <div class="row">
@@ -6,6 +6,7 @@
          value="{{ form[name] or defaults[name] }}"{% if not used %} disabled{% endif %}>
   <select name="{{ name }}_unit" aria-label="{{ label_en }} unit (หน่วยของ {{ label_en }})"{% if not used %} disabled{% endif %}>
     <option value="kohm"{% if (form[name ~ '_unit'] or defaults[name ~ '_unit']) == 'kohm' %} selected{% endif %}>kΩ</option>
+    <option value="mohm"{% if (form[name ~ '_unit'] or defaults[name ~ '_unit']) == 'mohm' %} selected{% endif %}>MΩ</option>
     <option value="ohm"{% if (form[name ~ '_unit'] or defaults[name ~ '_unit']) == 'ohm' %} selected{% endif %}>Ω</option>
   </select>
 </div>

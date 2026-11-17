@@ -41,7 +41,7 @@ from dataclasses import dataclass
 VCE_SAT = 0.2  # เกณฑ์ใบงาน Lab 03: VCE ≤ 0.2 V (Lab 2 เดิม 0.3 V)
 VBE_MIN = 0.0
 VBE_MAX = 1.0
-_UNITS = {"ohm": 1.0, "kohm": 1_000.0}
+_UNITS = {"ohm": 1.0, "kohm": 1_000.0, "mohm": 1_000_000.0}
 # ชื่อที่แสดงให้ผู้ใช้: (ภาษาอังกฤษ, ภาษาไทย)
 _PARAMS = {
     "vcc": ("VCC", "VCC"),
@@ -105,7 +105,7 @@ def _require_positive(name: str, value: float) -> float:
 def parse_resistance(raw: str, unit: str) -> float:
     """แปลงค่าความต้านทานที่ผู้ใช้กรอกเป็นโอห์ม
 
-    ``raw`` อาจมีช่องว่างหัวท้ายได้ และ ``unit`` ต้องเป็น ``"ohm"`` หรือ ``"kohm"``
+    ``raw`` อาจมีช่องว่างหัวท้ายได้ และ ``unit`` ต้องเป็น ``"ohm"``, ``"kohm"`` หรือ ``"mohm"``
     """
     text = str(raw).strip()
     try:
