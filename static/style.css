@@ -131,6 +131,37 @@ th.val,td.val{text-align:right;font-variant-numeric:tabular-nums}
 
 .placeholder{font-size:.9rem;color:var(--muted);margin:0}
 
+/* ปุ่มเลือกโหมด 3 ปุ่ม (คลิกครั้งเดียว = เปลี่ยนโหมด ไม่ต้องมีปุ่มโหลด) */
+.mode-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 4px}
+.mode-tab{
+  display:flex;flex-direction:column;gap:2px;
+  padding:10px 12px;text-align:left;cursor:pointer;
+  background:#f7fafc;color:#17344b;
+  border:1px solid #c8d8e4;border-radius:8px;
+  font:inherit;
+}
+.mode-tab:hover{background:#eef5fa;border-color:#8fb3cc}
+.mode-tab-en{font-weight:700;font-size:.9rem}
+.mode-tab-th{font-size:.78rem;color:var(--muted)}
+.mode-tab.active{
+  background:#103658;border-color:#103658;color:#fff;
+  box-shadow:inset 0 -3px 0 #0c8078;
+}
+.mode-tab.active .mode-tab-th{color:#c9dcea}
+@media (max-width:700px){
+  .mode-tabs{grid-template-columns:1fr}
+}
+
+/* ช่องที่โหมดปัจจุบันไม่ใช้: แสดงไว้แต่จางและกดไม่ได้ */
+label.unused{color:#93a3b0}
+label.unused .unused-tag{font-weight:400;font-size:.76rem;color:#93a3b0}
+input:disabled,select:disabled{
+  background:#eef2f5;
+  color:#93a3b0;
+  border-color:#dbe4ea;
+  cursor:not-allowed;
+}
+
 footer{text-align:center;color:var(--muted);font-size:.78rem;padding:18px}
 
 @media (max-width:700px){

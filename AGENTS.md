@@ -5,11 +5,17 @@
 
 ## 1. ขอบเขตของโปรเจกต์
 
-งานนี้เป็น **DC Bias ของ BJT แบบ Common Emitter + voltage divider เท่านั้น**
+งานนี้เป็น **DC Bias ของ BJT แบบ Common Emitter สามโหมด** (Lab 03, ENG29 2121)
 
-- ✅ ทำได้: คำนวณ DC bias, validation, warning, แผนภาพวงจร, test, เอกสาร
+| โหมด | ตัวต้านทานที่ใช้ | ฟังก์ชันใน `dc_bias.py` |
+|---|---|---|
+| Fixed Bias | RB, RC | `calculate_fixed_bias()` |
+| Emitter Bias (แหล่งจ่ายเดียว) | RB, RC, RE | `calculate_emitter_bias()` |
+| Voltage Divider Bias | R1, R2, RC, RE | `calculate_dc_bias()` |
+
+- ✅ ทำได้: คำนวณ DC bias ทั้งสามโหมด, validation, warning, แผนภาพวงจรตามโหมด, test, เอกสาร
 - ❌ ห้ามเพิ่ม: AC analysis, small-signal, gain, Bode plot, transient, SPICE/ngspice,
-  signal generator, load line, bias แบบอื่น (fixed bias, emitter bias), FET
+  signal generator, load line, FET หรือวงจรไบอัสแบบอื่นนอกสามโหมดนี้
 
 ถ้าโจทย์ใหม่จะพาออกนอกขอบเขตนี้ ให้ถามมนุษย์ก่อนเสมอ
 
@@ -25,6 +31,10 @@
    ผลลัพธ์ทุกตัวต้องคำนวณเสร็จที่ Python ก่อนส่ง HTML กลับ
 5. **ทุกสมการต้องมี test** — เพิ่ม/แก้สมการเมื่อไร ต้องมี test ใน `tests/test_dc_bias.py`
    ที่พิสูจน์ค่าตัวเลขจริง ไม่ใช่แค่ assert ว่าไม่ error
+   **ยกเว้นงาน Lab 03:** ใบงานกำหนดให้เก็บชุดทดสอบเดิมและตรวจผลผ่าน Browser (A1–A5)
+   จึงไม่เพิ่ม `unittest` ใหม่ในรอบนี้ — งานหลังจากนี้ให้กลับมาทำตามกฎนี้ตามปกติ
+6. **เพิ่มโหมดใหม่ได้ที่ `MODES` ใน `app.py` เท่านั้น** — ต้องประกาศรายการตัวต้านทานที่โหมดนั้น
+   ใช้จริง แล้วให้ route เลือกฟังก์ชันใน `dc_bias.py` — ห้ามเขียนสมการใน `app.py` หรือ template
 
 ## 3. เครื่องมือและคำสั่ง
 
@@ -35,7 +45,7 @@
 | ทดสอบ | `python -m unittest discover -s tests -v` |
 
 - ใช้ **`unittest`** เท่านั้น (ไม่ใช้ pytest) เพราะเป็นสิ่งที่หลักสูตรกำหนด
-- Python 3.14, Flask 3.x — **ห้ามเพิ่ม dependency ใหม่** โดยไม่ถามมนุษย์ก่อน
+- Python 3.12, Flask 3.x — **ห้ามเพิ่ม dependency ใหม่** โดยไม่ถามมนุษย์ก่อน
 
 ## 4. สไตล์โค้ด
 

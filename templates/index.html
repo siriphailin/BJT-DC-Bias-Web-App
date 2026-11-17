@@ -1,17 +1,28 @@
 {%- macro unit_symbol(unit) -%}{{ 'kΩ' if unit == 'kohm' else ('Ω' if unit == 'ohm' else '') }}{%- endmacro -%}
+{%- macro resistor(name, label_en, label_th, used) -%}
+<label for="{{ name }}"{% if not used %} class="unused"{% endif %}>{{ label_en }} — {{ label_th }}{% if not used %} <span class="unused-tag">(not used in this mode · ไม่ใช้ในโหมดนี้)</span>{% endif %}</label>
+<div class="row">
+  <input id="{{ name }}" type="number" step="any" name="{{ name }}"
+         value="{{ form[name] or defaults[name] }}"{% if not used %} disabled{% endif %}>
+  <select name="{{ name }}_unit" aria-label="{{ label_en }} unit (หน่วยของ {{ label_en }})"{% if not used %} disabled{% endif %}>
+    <option value="kohm"{% if (form[name ~ '_unit'] or defaults[name ~ '_unit']) == 'kohm' %} selected{% endif %}>kΩ</option>
+    <option value="ohm"{% if (form[name ~ '_unit'] or defaults[name ~ '_unit']) == 'ohm' %} selected{% endif %}>Ω</option>
+  </select>
+</div>
+{%- endmacro -%}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BJT DC Bias Calculator (คำนวณ DC Bias ของ BJT)</title>
+  <title>BJT DC Bias Calculator — Three Bias Circuits (คำนวณ DC Bias ของ BJT สามวงจร)</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <header>
-  <h1>BJT DC Bias Calculator — Common Emitter, Voltage Divider
-    (คำนวณ DC Bias ของ BJT แบบ Common Emitter แบ่งแรงดัน)</h1>
-  <p>ENG29 2121 · Lab 02 · Electronics Laboratory (ปฏิบัติการอิเล็กทรอนิกส์)</p>
+  <h1>BJT DC Bias Calculator — Fixed, Emitter and Voltage Divider
+    (คำนวณ DC Bias ของ BJT แบบไบอัสคงที่ อีมิตเตอร์ และแบ่งแรงดัน)</h1>
+  <p>ENG29 2121 · Lab 03 · Electronics Laboratory (ปฏิบัติการอิเล็กทรอนิกส์)</p>
 </header>
 
 <div class="wrap">
@@ -22,6 +33,27 @@
   </ul>
   {% endif %}
 
+  <section class="card">
+    <h2>Bias Mode (โหมดไบอัส)</h2>
+    <p class="placeholder">Pick a circuit — the diagram and the form change straight away
+      (เลือกวงจรได้เลย แผนภาพกับฟอร์มจะเปลี่ยนตามทันที)</p>
+    {# ปุ่มโหมด 3 ปุ่มแทน dropdown + ปุ่มโหลด: คลิกครั้งเดียวจึงเปลี่ยนโหมด
+       โดยยังเป็น HTML ล้วน ไม่มี JavaScript (AGENTS.md ข้อ 2.4) #}
+    <form method="get" action="/">
+      <div class="mode-tabs" role="group" aria-label="Bias mode (โหมดไบอัส)">
+        {% for key, info in modes.items() %}
+        <button type="submit" name="mode" value="{{ key }}"
+                class="mode-tab{% if form.mode == key %} active{% endif %}"
+                {%- if form.mode == key %} aria-current="true"{% endif %}>
+          <span class="mode-tab-en">{{ info.label }}</span>
+          <span class="mode-tab-th">{{ info.thai }}</span>
+        </button>
+        {% endfor %}
+      </div>
+    </form>
+    <p class="note">{{ modes[form.mode].description }}</p>
+  </section>
+
   <section class="card diagram">
     <h2>Circuit Diagram (แผนภาพวงจร)</h2>
     <p class="note diagram-note">
@@ -29,8 +61,8 @@
       (ค่าบนภาพถูกเติมโดย Python พร้อมกับผลลัพธ์ — ไม่ใช่ JavaScript)
     </p>
     <svg viewBox="0 0 760 500" role="img" aria-labelledby="sc-title">
-      <title id="sc-title">Voltage-divider biased NPN transistor circuit with component
-        values and node voltages (แผนภาพวงจรไบแอสแบบแบ่งแรงดัน พร้อมค่าอุปกรณ์และแรงดันที่ node)</title>
+      <title id="sc-title">{{ modes[form.mode].label }} NPN transistor circuit with component
+        values and node voltages (แผนภาพวงจร {{ modes[form.mode].thai }} พร้อมค่าอุปกรณ์และแรงดันที่ node)</title>
       <defs>
         <marker id="sc-arrow" viewBox="0 0 10 10" refX="9" refY="5"
                 markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -52,6 +84,7 @@
       <circle class="sc-n" cx="420" cy="60" r="3.5"/>
       <text class="sc-v" x="160" y="42" text-anchor="middle">VCC = {{ form.vcc }} V</text>
 
+      {% if form.mode == 'divider' %}
       <!-- R1: VCC to base -->
       <path class="sc-w" d="M160,60 V100"/>
       <path class="sc-w" d="M160,100 V106 L150,113 L170,127 L150,141 L170,155 L150,169 L170,183 L160,190 V200"/>
@@ -68,6 +101,16 @@
       <path class="sc-w" d="M160,420 V450"/>
       <text class="sc-l" x="188" y="378">R2 = {{ form.r2 }} {{ unit_symbol(form.r2_unit) }}</text>
       <path class="sc-g" d="M135,450 H185 M145,459 H175 M155,468 H165"/>
+      {% else %}
+      <!-- RB: VCC to base (Fixed และ Emitter Bias) -->
+      <path class="sc-w" d="M160,60 V150"/>
+      <path class="sc-w" d="M160,150 V156 L150,163 L170,177 L150,191 L170,205 L150,219 L170,233 L160,240 V270"/>
+      <text class="sc-l" x="188" y="198">RB = {{ form.rb }} {{ unit_symbol(form.rb_unit) }}</text>
+
+      <!-- base node -->
+      <circle class="sc-n" cx="160" cy="270" r="3.5"/>
+      <path class="sc-w" d="M160,270 H320"/>
+      {% endif %}
 
       <!-- RC: VCC to collector -->
       <path class="sc-w" d="M420,60 V100"/>
@@ -85,17 +128,26 @@
       <path class="sc-w" d="M372,318 L420,340"/>
       <text class="sc-l" x="330" y="205">β = {{ form.beta }}</text>
 
+      {% if form.mode == 'fixed' %}
+      <!-- emitter straight to ground: no RE -->
+      <path class="sc-w" d="M420,340 V450"/>
+      <path class="sc-g" d="M395,450 H445 M405,459 H435 M415,468 H425"/>
+      <text class="sc-l" x="448" y="378">RE not used (ไม่ใช้)</text>
+      {% else %}
       <!-- emitter to RE, then ground -->
       <path class="sc-w" d="M420,340 V346 L410,353 L430,367 L410,381 L430,395 L410,409 L430,423 L420,430 V440"/>
       <path class="sc-w" d="M420,440 V450"/>
       <text class="sc-l" x="448" y="398">RE = {{ form.re }} {{ unit_symbol(form.re_unit) }}</text>
       <path class="sc-g" d="M395,450 H445 M405,459 H435 M415,468 H425"/>
+      {% endif %}
 
       {% if result %}
       <!-- node voltages (computed by the backend) -->
       <text class="sc-v" x="178" y="300">VB = {{ "%.3f"|format(result.vb) }} V</text>
       <text class="sc-v" x="448" y="232">VC = {{ "%.3f"|format(result.vc) }} V</text>
+      {% if form.mode != 'fixed' %}
       <text class="sc-v" x="448" y="322">VE = {{ "%.3f"|format(result.ve) }} V</text>
+      {% endif %}
 
       <!-- computed summary panel -->
       <rect class="sc-p" x="575" y="90" width="175" height="96" rx="7"/>
@@ -104,51 +156,28 @@
       <text class="sc-v" x="590" y="166">IB = {{ "%.3f"|format(result.ib * 1000000) }} µA</text>
       {% endif %}
     </svg>
+    <p class="note diagram-caption">Diagram (แผนภาพ): <strong>{{ modes[form.mode].label }} ({{ modes[form.mode].thai }})</strong></p>
   </section>
 
   <div class="grid">
     <section class="card">
-      <h2>Circuit Parameters (พารามิเตอร์วงจร)</h2>
+      <h2>Circuit Parameters — {{ modes[form.mode].label }} (พารามิเตอร์วงจร)</h2>
 
       <form method="post" action="/calculate">
+        <input type="hidden" name="mode" value="{{ form.mode }}">
+        {% set used = modes[form.mode].resistors %}
+
+        <p class="note">Fields shown in grey are not used by this mode and are
+          disabled (ช่องที่จางคือช่องที่ไม่ใช้ในโหมดนี้ จึงกดแก้ไม่ได้และไม่ถูกนำไปคำนวณ)</p>
+
         <label for="vcc">VCC — Supply Voltage (แรงดันไฟเลี้ยง)</label>
         <input id="vcc" type="number" step="any" name="vcc" value="{{ form.vcc }}">
 
-        <label for="r1">R1 — VCC to Base (ตัวต้านทานจาก VCC ไป Base)</label>
-        <div class="row">
-          <input id="r1" type="number" step="any" name="r1" value="{{ form.r1 }}">
-          <select name="r1_unit" aria-label="R1 unit (หน่วยของ R1)">
-            <option value="kohm"{% if form.r1_unit == 'kohm' %} selected{% endif %}>kΩ</option>
-            <option value="ohm"{% if form.r1_unit == 'ohm' %} selected{% endif %}>Ω</option>
-          </select>
-        </div>
-
-        <label for="r2">R2 — Base to Ground (ตัวต้านทานจาก Base ไป Ground)</label>
-        <div class="row">
-          <input id="r2" type="number" step="any" name="r2" value="{{ form.r2 }}">
-          <select name="r2_unit" aria-label="R2 unit (หน่วยของ R2)">
-            <option value="kohm"{% if form.r2_unit == 'kohm' %} selected{% endif %}>kΩ</option>
-            <option value="ohm"{% if form.r2_unit == 'ohm' %} selected{% endif %}>Ω</option>
-          </select>
-        </div>
-
-        <label for="rc">RC — VCC to Collector (ตัวต้านทานจาก VCC ไป Collector)</label>
-        <div class="row">
-          <input id="rc" type="number" step="any" name="rc" value="{{ form.rc }}">
-          <select name="rc_unit" aria-label="RC unit (หน่วยของ RC)">
-            <option value="kohm"{% if form.rc_unit == 'kohm' %} selected{% endif %}>kΩ</option>
-            <option value="ohm"{% if form.rc_unit == 'ohm' %} selected{% endif %}>Ω</option>
-          </select>
-        </div>
-
-        <label for="re">RE — Emitter to Ground (ตัวต้านทานจาก Emitter ไป Ground)</label>
-        <div class="row">
-          <input id="re" type="number" step="any" name="re" value="{{ form.re }}">
-          <select name="re_unit" aria-label="RE unit (หน่วยของ RE)">
-            <option value="kohm"{% if form.re_unit == 'kohm' %} selected{% endif %}>kΩ</option>
-            <option value="ohm"{% if form.re_unit == 'ohm' %} selected{% endif %}>Ω</option>
-          </select>
-        </div>
+        {{ resistor('r1', 'R1 — VCC to Base', 'ตัวต้านทานจาก VCC ไป Base', 'r1' in used) }}
+        {{ resistor('r2', 'R2 — Base to Ground', 'ตัวต้านทานจาก Base ไป Ground', 'r2' in used) }}
+        {{ resistor('rb', 'RB — VCC to Base', 'ตัวต้านทานจาก VCC ไป Base', 'rb' in used) }}
+        {{ resistor('rc', 'RC — VCC to Collector', 'ตัวต้านทานจาก VCC ไป Collector', 'rc' in used) }}
+        {{ resistor('re', 'RE — Emitter to Ground', 'ตัวต้านทานจาก Emitter ไป Ground', 're' in used) }}
 
         <label for="beta">β — Current Gain (อัตราขยายกระแส hFE)</label>
         <input id="beta" type="number" step="any" name="beta" value="{{ form.beta }}">
@@ -162,6 +191,7 @@
 
     <section class="card">
       <h2>DC Bias Results (ผลลัพธ์ DC Bias)</h2>
+      <p class="note">Mode (โหมด): <strong>{{ modes[form.mode].label }} ({{ modes[form.mode].thai }})</strong></p>
       {% if result %}
         {% if result.region == 'active' %}
         <span class="badge ok">Forward Active (ช่วงขยาย)</span>
@@ -249,8 +279,10 @@
           <strong>Assumptions (สมมติฐาน):</strong> Forward-Active approximation
           (แบบจำลองช่วงขยาย) — constant β (β คงที่ = {{ form.beta }}), constant VBE
           (VBE คงที่ = {{ form.vbe }} V), no Early effect (ไม่คิด Early effect).
-          Not a SPICE result (ไม่ใช่ผลจาก SPICE).<br>
+          Not a SPICE result (ไม่ใช่ผลจาก SPICE).
+          {% if form.mode == 'divider' %}<br>
           VTH = {{ "%.3f"|format(result.vth) }} V · RTH = {{ "%.3f"|format(result.rth / 1000) }} kΩ
+          {% endif %}
         </p>
       {% else %}
         <p class="placeholder">
