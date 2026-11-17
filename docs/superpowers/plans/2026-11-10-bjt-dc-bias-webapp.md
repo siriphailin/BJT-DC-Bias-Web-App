@@ -415,7 +415,6 @@ Summary: `Add Flask routes, Jinja template and stylesheet for DC bias`
 - Create: `AGENTS.md`
 - Create: `docs/design-note.md`
 - Create: `docs/validation.md`
-- Create: `docs/reflection.md`
 
 **Interfaces:**
 - Consumes: คำสั่งรัน/ทดสอบจาก Task 1–2
@@ -437,15 +436,7 @@ Summary: `Add Flask routes, Jinja template and stylesheet for DC bias`
 
 ตารางค่าอ้างอิง (ค่าที่คำนวณเต็มความละเอียด: VTH 2.16393 V, RTH 18.03279 kΩ, IB 12.2986 µA, IC 1.22986 mA, IE 1.24216 mA, VE 1.24216 V, VB 1.94216 V, VC 9.29431 V, VCE 8.05216 V — กำกับค่าในใบงาน 8.0523 V ไว้ด้วย), วิธีคำนวณมือทีละขั้น, คำอธิบายว่าใบงานปัด IB เป็น 12.298 µA ก่อนคำนวณต่อจึงต่างกันในหลักที่ 4, สมมติฐาน (β คงที่, VBE คงที่ 0.7 V), และกรณีที่แบบจำลองใช้ไม่ได้ (cutoff / saturation)
 
-- [ ] **Step 5: สร้างโครง `docs/reflection.md` (นักศึกษาเขียนคำตอบเอง)**
-
-สร้างไฟล์ที่มี 4 หัวข้อคำถามจากใบงาน แต่ละข้อมีคำใบ้สั้น ๆ ว่าควรอธิบายประเด็นใด และช่อง `**คำตอบ:**` เปล่าไว้ให้เขียนเอง ห้ามเติมคำตอบแทนนักศึกษา:
-1. ทำไมการเปิด `templates/index.html` ตรง ๆ (`file://`) จึงไม่เท่ากับการรัน Flask — ใบ้: ใครเป็นคนคำนวณ, มี HTTP request หรือไม่
-2. ฟอร์มส่งข้อมูลไป Python อย่างไร — ใบ้: method, action, `request.form`, ชื่อ route
-3. แก้สมการใน `dc_bias.py` แล้วต้องแก้ HTML หรือไม่ — ใบ้: การแยกความรับผิดชอบระหว่าง logic กับ template
-4. ทำไมผลใน Region ที่แบบจำลองใช้ไม่ได้จึงต้องมี Warning — ใบ้: Forward-Active approximation ใช้สมมติฐานอะไร
-
-- [ ] **Step 6: ตรวจ reproducibility จาก environment ใหม่**
+- [ ] **Step 5: ตรวจ reproducibility จาก environment ใหม่**
 
 ```
 Remove-Item -Recurse -Force .venv-check -ErrorAction SilentlyContinue
@@ -455,16 +446,16 @@ python -m venv .venv-check
 ```
 Expected: `Ran 20 tests ... OK` และติดตั้งได้โดยไม่ต้องแก้อะไร
 
-- [ ] **Step 7: เก็บหลักฐานส่งงาน (ใบงานกำหนดให้ส่งภาพหน้าจอ + Test Log)**
+- [ ] **Step 6: เก็บหลักฐานส่งงาน (ใบงานกำหนดให้ส่งภาพหน้าจอ + Test Log)**
 
 1. รัน `python -m unittest discover -s tests -v` แล้วคัดลอกผลทั้งหมดลง `docs/test-log.md` ในบล็อกโค้ด พร้อมวันที่
 2. เปิด `http://127.0.0.1:5000/` กด Calculate ด้วยค่าตัวอย่าง แล้วบันทึกภาพหน้าจอที่เห็นผล DC Bias ครบ ไว้ที่ `docs/screenshots/calculate-success.png`
 3. ถ่ายภาพหน้าจอกรณีกรอกค่าผิด (R1 = 0) ไว้ที่ `docs/screenshots/validation-error.png`
 4. ตรวจว่า `.gitignore` ไม่ได้กันโฟลเดอร์ `docs/screenshots/`
 
-- [ ] **Step 8: Commit ผ่าน GitHub Desktop**
+- [ ] **Step 7: Commit ผ่าน GitHub Desktop**
 
-Summary: `Add README, validation notes and reflection for Lab 02`
+Summary: `Add README and validation notes for Lab 02`
 → Commit to main → กด **Push origin**
 
 ---

@@ -62,7 +62,7 @@
 - agent stage ไฟล์ได้ (`git add`) แต่ต้องหยุดและรายงานให้มนุษย์ commit
 - ห้าม commit `.venv/`, `__pycache__/`, `.env`
 - ข้อความ commit ใช้ภาษาอังกฤษ รูปแบบ imperative เช่น
-  `Add README, validation notes and reflection for Lab 02`
+  `Add README and validation notes for Lab 02`
 
 ## 6. ลำดับการทำงาน
 
