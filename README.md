@@ -36,7 +36,7 @@
 |---|---|
 | GitHub repository | <https://github.com/siriphailin/BJT-DC-Bias-Web-App> |
 | Commit SHA ของ Lab 03 | `442c05cd329660c48b4ca142e22bedc554d99e99` |
-| วิธีตรวจผลจริง | **OpenCode Browser** (Playwright MCP = **NOT USED** เพราะยังไม่ได้ตั้งค่า MCP server ในโปรเจกต์ — ใบงานข้อ 05 อนุญาตให้ใช้ browser tool ของ OpenCode Desktop แทนได้) |
+| วิธีตรวจผลจริง | **OpenCode Browser** |
 
 ---
 
