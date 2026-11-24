@@ -38,7 +38,7 @@
 |---|---|
 | GitHub repository | <https://github.com/siriphailin/BJT-DC-Bias-Web-App> |
 | Commit SHA ของ Lab 03 | `442c05cd329660c48b4ca142e22bedc554d99e99` |
-| Commit SHA ของ Lab 04 (tag `lab04`) | `7767a3a463054144e0f5471175aab79564bb35f8` |
+| Commit SHA ของ Lab 04 (tag `lab04`) | `e34fcaaedad1d35c4c8e24a0af29155c2121e267` |
 | วิธีตรวจผลจริง | **OpenCode Browser** |
 
 ---
@@ -96,18 +96,20 @@ Copy-Item "$work\tools\Spice64" -Destination $target -Recurse -Force
 python -m unittest discover -s tests -v
 ```
 
-ผลที่ต้องได้: **`Ran 63 tests` … `OK`** (20 เดิมของ Lab 03 + 43 ของ Lab 04)
+ผลที่ต้องได้: **`Ran 64 tests` … `OK`** (20 เดิมของ Lab 03 + 44 ของ Lab 04)
+ล็อกผลรันจริงวันที่ 2026-11-24 (ไม่มี skip) อยู่ใน [`docs/test-log.md`](docs/test-log.md)
 
 ชุดทดสอบแบ่งเป็นสี่ชั้น
 
 | ไฟล์ | จำนวน | ตรวจอะไร |
 |---|---|---|
 | `tests/test_dc_bias.py` | 14 | สมการ, การแปลงหน่วย, การปฏิเสธค่าผิด, การแบ่ง Region และ warning |
-| `tests/test_web.py` | 6 | Flask route เดิม: `GET /` 200, `POST /calculate` 200/400, ค่าที่คำนวณขึ้นหน้าเว็บ |
+| `tests/test_web.py` | 7 | Flask route เดิม: `GET /` 200, `POST /calculate` 200/400, ค่าที่คำนวณขึ้นหน้าเว็บ, ปุ่มสลับ Lab 03/04 |
 | `tests/test_spice_engine.py` | 28 | validation (รวม RL และหน่วยของ Source), netlist, parser, error status, ngspice จริง, SVG |
 | `tests/test_simulator_web.py` | 15 | `/simulator`, `/simulate`, ไม่มี JS, 3 radio, ชื่อบล็อกใหม่, schematic กล่องอิมพิแดนซ์+วงกลม BJT+ลูกศร Vin+rail สั้น+ไม่มีตัวเลข, success/error render, กราฟ/ตารางครบ, IC + provenance + analytical + −3 dB, end-to-end จริง |
 
-> ชุดทดสอบ SPICE ที่เรียก engine จริงจะ `skip` อัตโนมัติถ้าไม่พบ `ngspice_con.exe` ตำแหน่งด้านบน
+> ถ้าไม่พบ `ngspice_con.exe` ชุดทดสอบ SPICE จะ `skip` อัตโนมัติ; ในเครื่องนี้ติดตั้ง ngspice-47 แล้ว
+> รอบล่าสุดจึง **ไม่มี test ใดถูก skip** (รวม end-to-end ที่เรียก engine จริง)
 
 Impeccable v0.1.27 เป็นเครื่องมือพัฒนา UI (ไม่ใช่ runtime dependency) ติดตั้งแบบ project-scope
 ใน `.opencode/`; เรียกผ่าน `.opencode\skills\impeccable\scripts\impeccable.cmd`
@@ -194,10 +196,10 @@ radio เป็นตัวเลือก "focus" เท่านั้น จ�
 `BF=100 IS=1E-14 VAF=100 RB=0 CJE=CJC=TF=TR=0` ไม่ใช่ part number ของทรานซิสเตอร์จริง
 และกราฟ AC ส่วนใหญ่สะท้อนตัวเก็บประจุคู่จ่าย ไม่ใช่ capacitance ภายในทรานซิสเตอร์
 
-ผลตรวจ B1–B8 หลัง redesign ด้วย OpenCode Browser และ Impeccable CLI อยู่ใน
-[`docs/validation.md`](docs/validation.md) (หัวข้อ 9) ภาพหน้าจอใหม่คือ
-`docs/screenshots/lab04-redesign-desktop-1280x900.png` และ
-`lab04-redesign-phone-390x844.png`
+ผลตรวจ B1–B8 **รอบสุดท้ายกับโค้ดที่ push จริง** ด้วย OpenCode Browser และ Impeccable CLI อยู่ใน
+[`docs/validation.md`](docs/validation.md) หัวข้อ **9.8** ภาพหน้าจอจากการรัน ngspice จริงคือ
+`docs/screenshots/lab04-final-desktop-1280x900.png` และ
+`lab04-final-phone-390x844.png` (หัวข้อ 9.5–9.7 เป็นหลักฐานรอบก่อนหน้า)
 
 ### AI สร้าง/เปลี่ยนอะไร — นักศึกษาตรวจอะไร (Lab 04)
 
@@ -210,9 +212,9 @@ radio เป็นตัวเลือก "focus" เท่านั้น จ�
 - **นักศึกษา:** ตรวจว่า `README.md` มี Lab 04 Commit SHA + วิธี `pip install` + วิธีติดตั้ง ngspice
   แล้ว push ขึ้น GitHub ก่อนส่ง
 
-> หมายเหตุความถูกต้อง: ภาพหน้าจอและตาราง B1–B8 ใน `docs/validation.md` ถ่ายก่อนการเพิ่ม
-> IC/provenance/analytical/−3 dB รอบล่าสุด; ส่วนที่เพิ่มใหม่ตรวจด้วยชุดทดสอบ 63 ตัวแล้ว
-> การกดทวนบน Browser รอบสุดท้ายยังรอทำ (ดู §9.7)
+> ความถูกต้อง: ตาราง B1–B8 ใน §9.5–§9.7 เป็นของรอบก่อนหน้า; ผลทวนกับโค้ดสุดท้าย
+> (รวม IC/provenance/analytical/−3 dB, บล็อก Engine ngspice และปุ่มสลับแล็บ)
+> อยู่ใน **§9.8** พร้อม screenshot ใหม่ — ตรวจด้วย browser จริงและชุดทดสอบ 64 ตัวแล้ว
 
 ## โครงสร้างไฟล์
 
@@ -224,7 +226,7 @@ BJT DC Bias Web App/
 ├── templates/index.html    # Lab 03 UI (แก้เพียงเพิ่มลิงก์ไป /simulator)
 ├── templates/simulator.html# Lab 04 UI: 3 blocks, schematic, unit selects, 2 plots, 3 tables
 ├── static/style.css        # Lab 03 styles + .sim-* styles
-├── tests/                  # unittest 63 ตัว (20 เดิม + 43 ของ Lab 04)
+├── tests/                  # unittest 64 ตัว (20 เดิม + 44 ของ Lab 04)
 ├── docs/                   # design-note, validation, screenshots, spec/plan
 ├── requirements.txt
 ├── AGENTS.md               # conventions สำหรับ AI coding agent

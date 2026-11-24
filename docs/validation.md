@@ -155,7 +155,7 @@ VCE = 9.29431 − 1.24216  = 8.05216 V
 ## 7. วิธีตรวจซ้ำด้วยตัวเอง
 
 ```bash
-# รันชุดทดสอบทั้งหมด (63 ตัว: Lab 03 20 + Lab 04 43)
+# รันชุดทดสอบทั้งหมด (64 ตัว: Lab 03 20 + Lab 04 44)
 python -m unittest discover -s tests -v
 
 # ตรวจค่าตัวอย่างจากใบงานด้วยมือ
@@ -526,7 +526,7 @@ DOM มี `<script>` จำนวน **0** และ console level=error ว่
 - กด radio `tran` แล้ว checked เปลี่ยนเป็น `tran`, active tab เดียวคือ `Transient waveform`,
   ค่าฟอร์ม (`vcc=12`, `rl=10`, `amplitude=10`, `frequency=1`) ไม่เปลี่ยน และหลังรันตารางยังครบ
   3 + `<polyline>` 4 → radio เป็น focus เท่านั้น ไม่ reload/ล้างผล
-- ชุดทดสอบหลัง redesign: **`Ran 62 tests ... OK`** (เพิ่ม test ตรวจบล็อกเกริ่นนำบนสุด + ชื่อ `Circuit & Parameters` เดิม, กล่องอิมพิแดนซ์, วงกลม BJT, ลูกศร Vin, rail VCC สั้น และไม่มีตัวเลขบนสัญลักษณ์) — รอบปรับตาม Checklist เพิ่มอีก 1 ตัว รวม **63** (ดู §9.7)
+- ชุดทดสอบหลัง redesign: **`Ran 62 tests ... OK`** (เพิ่ม test ตรวจบล็อกเกริ่นนำบนสุด + ชื่อ `Circuit & Parameters` เดิม, กล่องอิมพิแดนซ์, วงกลม BJT, ลูกศร Vin, rail VCC สั้น และไม่มีตัวเลขบนสัญลักษณ์) — รอบปรับตาม Checklist เพิ่มอีก 1 ตัว และรอบปุ่มสลับแล็บเพิ่มอีก 1 ตัว รวม **64** (ดู §9.7)
 
 หลักฐานภาพจาก browser/CLI จริง (หลัง redesign):
 
@@ -557,7 +557,7 @@ B7  ENGINE_NOT_FOUND → Engine not ready — NGspice executable not found
 | Critique (layout เดิม) | รัน Assessment A (design review) และ Assessment B (detector + screenshot) แบบแยก sub-agent ตาม reference ของ Impeccable v0.1.27 | A: Nielsen 25/40, cognitive load สูง, 3 P1 (tab reset, ไม่มี schematic, AC caveat/cutoff ไม่ชัด); B: detector 4 findings ใน markup scan |
 | Polish (layout เดิม) | tab เปลี่ยนจาก `<a href>` เป็น `<button formmethod="get">`; `GET /simulator` อ่านค่าจาก query; เพิ่ม schematic; range hint; remedy ของ engine หาย | 15/20 Good; `.impeccable/audit/2026-11-24T08-45-44Z__project.md` (รายงาน nàyอธิบาย **ก่อน redesign** เท่านั้น) |
 | Redesign (รอบปัจจุบัน) | เปลี่ยนเป็น 3 blocks ตามที่ผู้ขอระบุ; radio `DC/AC/Transient` แทน GET-tab; run ครั้งเดียวได้ 3 analysis; เพิ่ม `RL`, source units, schematic voltage-divider ใหม่, แสดง engine path | `app.py`, `spice_engine.py`, `templates/simulator.html`, `static/style.css`, tests; 62 tests ผ่าน; browser ตรวจ B1–B7 ใหม่ |
-| ปรับตาม Checklist (รอบสุดท้าย) | เอา `analytical`/`netlist`/`log` กลับมาแบบแยกป้าย, เพิ่ม IC, −3 dB, README install/SHA/AI-student | `app.py`, `templates/simulator.html`, `static/style.css`, tests, `README.md`; 63 tests ผ่าน; browser รอทวน (§9.7) |
+| ปรับตาม Checklist (รอบสุดท้าย) | เอา `analytical`/`netlist`/`log` กลับมาแบบแยกป้าย, เพิ่ม IC, −3 dB, README install/SHA/AI-student | `app.py`, `templates/simulator.html`, `static/style.css`, tests, `README.md`; 64 tests ผ่าน; browser ทวนรอบสุดท้ายใน §9.8 |
 | Detect (หลัง redesign) | `impeccable detect --json http://127.0.0.1:5000/simulator` และ `shot --viewport 1280x900,390x844` | เหลือ advisory/warning (`straggler`, `em-dash-overuse`, `nested-cards`) ไม่มี primary finding เรื่อง overflow หรือ tap target; screenshot ใหม่สองไฟล์ในตาราง 9.5 |
 
 > ข้อมูลในหัวข้อ 9.2–9.3 เป็น **result จาก ngspice จริง** ที่ใช้ validate parser ส่วนหัวข้อ 9.5
@@ -565,7 +565,7 @@ B7  ENGINE_NOT_FOUND → Engine not ready — NGspice executable not found
 
 ### 9.7 รอบปรับให้ตรง Checklist ของใบงาน (หลัง screenshot ชุดเดิม)
 
-สิ่งที่เพิ่ม/แก้หลังการถ่าย screenshot ใน §9.5 (ตรวจด้วยชุดทดสอบ ไม่ได้อ้างว่า browser ทวนใหม่แล้ว):
+สิ่งที่เพิ่ม/แก้หลังการถ่าย screenshot ใน §9.5 (ตรวจด้วยชุดทดสอบ; browser ทวนรอบสุดท้ายใน §9.8):
 
 | รายการที่ใบงานต้องการ | สิ่งที่เพิ่มจริง | วิธีตรวจ |
 |---|---|---|
@@ -579,12 +579,37 @@ B7  ENGINE_NOT_FOUND → Engine not ready — NGspice executable not found
 | เอกสารส่งงาน | `README.md`: Lab 04 Commit SHA, `pip install -r requirements.txt`, วิธีติดตั้ง ngspice, 3–5 บรรทัด AI/student | อ่าน README; `git log -1` |
 
 **สถานะตามความจริง:** ตาราง B1–B8 และ screenshot ใน §9.5–§9.6 เป็นหลักฐานของ **รอบก่อนหน้า**
-การเพิ่มรายการข้างบน รอบนี้กดทวนบน Browser จริงแล้วเฉพาะการลบ `Engine detected on this machine` /
-`Model assumption`, การย้าย status ไปบล็อก `Engine ngspice` ด้านล่างสุด และปุ่มสลับ Lab 03/04
-(DOM เห็น 5 block, 3 แถว `SUCCESS`, console error 0, ไม่มีข้อความถูกลบ; คลิกสลับแล้ว URL เปลี่ยนจริง)
-แต่ยัง **ไม่ได้ถ่าย screenshot ใหม่** — ต้องทำก่อนอ้าง PASS ของ B1–B8 รอบสุดท้าย
-(ตามข้อกำหนด "ห้ามอ้าง PASS ถ้า tool/browser ไม่ได้รันจริง")
-ชุดทดสอบรอบนี้: `Ran 63 tests ... OK` (Flask 3.1.3 ติดตั้งด้วย `pip install --user -r requirements.txt`
+การเพิ่มรายการข้างบน ยังไม่ใช้อ้าง PASS ของโค้ดปัจจุบัน — ผลทวนจริงกับโค้ดสุดท้ายอยู่ใน **§9.8**
+ชุดทดสอบรอบนี้: `Ran 64 tests ... OK` (Flask 3.1.3 ติดตั้งด้วย `pip install --user -r requirements.txt`
 และ ngspice-47 ติดตั้งที่ `%LOCALAPPDATA%\Programs\ngspice-47\Spice64\bin\ngspice_con.exe` แล้ว
 → **ไม่มี test ใดถูก skip** รวม test end-to-end ที่เรียก engine จริง)
+
+### 9.8 ทวน B1–B8 กับโค้ดสุดท้าย (2026-11-24, HEAD `e34fcaa`)
+
+รอบนี้รันจริงกับโค้ดปัจจุบัน ไม่ใช่หลักฐานจากรอบก่อนหน้า: Flask port 5000 ปกติ,
+port 5001 ตั้ง `NGSPICE_ENGINE=missing-engine.exe`; ใช้ OpenCode Browser อ่าน DOM หลัง render,
+Impeccable `detect --json --viewport` สำหรับ B8 และ `impeccable shot --full` สำหรับภาพหน้าจอ
+(ใช้ route ชั่วคราว `/__shot` ที่เรียก `run_all_for_request()` จริงเพื่อให้ภาพมีผลลัพธ์
+แล้วลบ helper ออกหลังถ่าย — route การทำงานของแอปไม่เปลี่ยน)
+
+| Case | Input | Observed (อ่านจาก DOM จริง) | Evidence | Status |
+|---|---|---|---|---|
+| B1 regression `/` | A1 Divider / A2 Fixed / A3 Emitter | Divider **IC 1.230 mA · VCE 8.052 V**; Fixed **1.130 mA · 9.514 V**; Emitter **1.026 mA · 8.705 V**; `Forward Active` ทุกโหมด; ปุ่มสลับ Lab 03/04 อยู่เหนือบล็อกแรก; `<script>` 0 | `wait()` เจอ `Forward Active`; console error 0; 20 test เดิมยังผ่าน | **PASS** |
+| B2 default run | ค่าคงที่, กด `Run simulation` ครั้งเดียว | `SUCCESS`; DC **1.949 / 1.289 / 9.189 / 7.900 V · IC 1.278 mA**; AC **1000 Hz · 4.86 dB · −179.9°**; Tran **0.010 V · −0.017 V · 0.253 ms**; 5 blocks ตามลำดับ `intro → 1 Circuit → 2 Simulation → 3 Results → 4 Engine ngspice`; 3 แถว `SUCCESS`; `<polyline>` 4; `<script>` 0; radio `dc` checked แถวเดียว; low −3 dB **1.8 Hz**; มี `NOT a SPICE result` | DOM จริงจาก browser; `statusRows` 3 แถว; engine block เป็นบล็อกสุดท้าย | **PASS** |
+| B3 แก้ resistor | `RE=2 kΩ` แล้วรัน | AC note `Peak ≈ -1.14 dB · @1000 Hz = -1.14 dB / -179.9° · 121 points`; DC **2.048 / 1.405 / 10.469 / 9.065 V · IC 0.696 mA**; `<polyline>` 4; schematic ไม่มีตัวเลขกำกับอุปกรณ์ | เปรียบเทียบ note/ตารางก่อน–หลัง; ค่าฟอร์ม `re=2` ยังอยู่ | **PASS** |
+| B4 AC Bode | `.ac dec 20 1 1Meg` | @1 kHz **4.86 dB / −179.9° · 121 points**; axes `Frequency (Hz)`, `Gain (dB)`, `Phase (deg)`; `<polyline>` 2 ในกราฟ Bode | DOM + note จากการรันเดียวกับ B2 | **PASS** |
+| B5 Transient | 10 mV, 1 kHz | note `Vin ≈ 0.020 Vpp · Vout ≈ 0.035 Vpp · 508 points`; ตาราง `0.010 V · −0.017 V · 0.253 ms`; `<polyline>` 2 ในกราฟ waveform | DOM จริง | **PASS** |
+| B6 แก้ RL/source | `RL=4.7 kΩ`, `amplitude=0.02 V`, `frequency=2000 Hz` | AC **3.25 dB / −179.8°**; Tran **0.020 V · −0.029 V · 0.126 ms**; ช่องฟอร์มเก็บค่าใหม่ครบ; provenance มี `.ac dec 20 1 1Meg` | เปรียบเทียบกับ B2; netlist/provenance อ่านจาก `textContent` | **PASS** |
+| B7 error | `RE=0` และ port 5001 `NGSPICE_ENGINE=missing-engine.exe` | `POST /simulate` → **HTTP 400** พร้อม `RE must be greater than 0`, ไม่มี `SUCCESS`/`1.949`, ตารางผล 0, `<polyline>` 0; port 5001 → **ENGINE_NOT_FOUND** + `What to try`, ไม่มี `SUCCESS`/`1.949`, `<polyline>` 0 | `network.list` เห็น status 400; console error 400 เป็นผลจากการทดสอบผิด input ตั้งใจ | **PASS** |
+| B8 responsive | `detect --json --viewport 1280x900` และ `390x844` | 1280×900: **7 findings** (advisory 3, warning 4, **failure 0**) = `straggler` 2, `nested-cards` 4, `em-dash-overuse` 1 · 390×844: **10 findings** (advisory 6, warning 4, **failure 0**) เพิ่ม `unbalanced-heading` 2; ไม่มี overflow แน่นอน (`scrollWidth == clientWidth` ที่ viewport 484px); `.lab-switch` และ `.sim-tabs` collapse เป็น 1 คอลัมน์ | CLI detect จริง 2 viewport + browser evaluate | **PASS (render)** |
+
+ภาพหน้าจอจากรันจริง (full page):
+
+| ไฟล์ | เนื้อหา |
+|---|---|
+| [`lab04-final-desktop-1280x900.png`](screenshots/lab04-final-desktop-1280x900.png) | viewport 1280×900, ภาพ 1280×3568: ปุ่มสลับแล็บ, schematic, 2 กราฟ, 3 ตารางผล + analytical, บล็อก `Engine ngspice` ด้านล่างสุด |
+| [`lab04-final-phone-390x844.png`](screenshots/lab04-final-phone-390x844.png) | viewport 390×844, ภาพ 406×5513 (รวม scrollbar): layout collapse บนจอแคบ |
+
+> หมายเหตุ: B1–B8 ใน §9.5–§9.7 เป็นหลักฐานของรอบก่อนหน้า; ตารางนี้คือผลทวนกับโค้ดที่ push จริง
+> (`e34fcaa`) และเป็นแหล่งที่ควรใช้อ้าง PASS รอบสุดท้าย
 
