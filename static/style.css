@@ -211,7 +211,6 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:18px}
 .sim-run-note{background:#eef5fa;border:1px solid #c8d8e4;padding:8px 10px;border-radius:6px}
 .sim-status-message{margin:0 0 10px;font-weight:700}
 .sim-remedy{background:#fff8e6;border:1px solid #e8d48a;padding:10px 12px;border-radius:6px;font-size:.86rem}
-.sim-model-warning{background:#f2f8fb;border:1px solid #bcd9e2;padding:8px 10px;border-radius:6px}
 .sim-groups{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:start}
 .sim-group{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:0;min-width:0}
 .sim-group legend{font-size:.88rem;font-weight:700;color:#113c60;padding:0 6px}
@@ -265,6 +264,8 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:18px}
 .sim-run-status-table{margin:0 0 12px;font-size:.82rem}
 .sim-run-status-table th,.sim-run-status-table td{padding:6px 9px}
 .sim-run-status-table .sim-badge{margin:0;padding:2px 8px;font-size:.72rem}
+.sim-units-table{margin:10px 0 14px;font-size:.82rem}
+.sim-units-table th,.sim-units-table td{padding:6px 9px}
 .sim-reference{
   border:1px solid #bcd9e2;border-left:4px solid var(--teal);border-radius:0 8px 8px 0;
   background:#f2f8fb;padding:12px 14px;margin:16px 0 0;

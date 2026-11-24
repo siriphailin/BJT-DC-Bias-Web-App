@@ -519,7 +519,8 @@ DOM มี `<script>` จำนวน **0** และ console level=error ว่
 - **ไม่มีตัวเลขบนสัญลักษณ์**: เพราะข้อกำหนดห้ามใช้ JavaScript ฝั่ง client การอัปเดตตัวเลขทุกครั้งที่พิมพ์
   ทำไม่ได้ จึงลบ `<g class="sim-value">` ออก เหลือเฉพาะชื่อ `VCC/VIN/R1/R2/RC/RE/RL/CIN/COUT/B/C/E/Q1`;
   ค่าที่กรอกอยู่ในฟอร์มและมีผลกับ netlist/ผลลัพธ์หลังกด Run ตามปกติ
-- บล็อก Simulation แสดง path ที่ตรวจพบจริง:
+- บล็อก Simulation แสดง path ที่ตรวจพบจริง (ข้อความนี้เป็นของ UI **รอบก่อนหน้า**;
+  รอบปัจจุบันลบออกแล้ว ดู §9.7):
   `Engine detected on this machine: C:\Users\B6837020\AppData\Local\Programs\ngspice-47\Spice64\bin\ngspice_con.exe`
   (ค้นจาก PATH + โฟลเดอร์ติดตั้งที่พบบ่อย; `find_ngspice_engine()`)
 - กด radio `tran` แล้ว checked เปลี่ยนเป็น `tran`, active tab เดียวคือ `Transient waveform`,
@@ -569,16 +570,19 @@ B7  ENGINE_NOT_FOUND → Engine not ready — NGspice executable not found
 | รายการที่ใบงานต้องการ | สิ่งที่เพิ่มจริง | วิธีตรวจ |
 |---|---|---|
 | B2 ต้องเห็น `VB/VE/VC/VCE/IC` | ตาราง `DC Operating Point` เพิ่มคอลัมน์ **IC** (mA) จาก `parse_op()["ic_mA"]` | `tests/test_simulator_web.py` ตรวจ `<th>IC</th>` และค่า `1.278` |
-| ระบุ Model / Run Status / provenance | กล่อง `Netlist & engine log — result provenance` แสดง `model`, `analysis_directives`, netlist ที่ส่งจริง และ log excerpt; status เดิมยังอยู่ | test ตรวจ `QNPN teaching model`, `.ac dec 20 1 1Meg`, ข้อความ summary |
+| ระบุ Model / Run Status / provenance | กล่อง `Netlist & engine log — result provenance` แสดง `analysis_directives`, netlist ที่ส่งจริง และ log excerpt; `model` ย้ายไปอยู่ในบล็อก `Engine ngspice` ด้านล่างสุด | test ตรวจ `QNPN teaching model`, `.ac dec 20 1 1Meg`, ข้อความ summary |
 | แยก analytical ออกจาก SPICE | กล่อง `Analytical reference — NOT a SPICE result` เรียก `calculate_dc_bias()` จาก `dc_bias.py` แยกจากผล ngspice | test ตรวจข้อความป้าย |
 | −3 dB หาไม่เจอต้องไม่แต่งเลข | เรียก `find_low_cutoff(ac_points)` จริง; ไม่พบ → ข้อความ **`not determined in sweep range`** | test ตรวจข้อความ และ test อีกตัวตรวจเลขเมื่อพบจุดตัด |
-| Run Status ต่อ analysis | ตาราง `Analysis / Directive / Run Status / Message` แยก DC, AC, Transient | test ตรวจคำว่า `Run Status`; browser อ่าน DOM จริงเห็น 3 แถว `SUCCESS` |
-| Model assumption | ป้ายเตือนว่า `QNPN` เป็น teaching model ไม่ใช่ part number จริง | test ตรวจคำว่า `Model assumption` |
+| Run Status ต่อ analysis | ตาราง `Analysis / Directive / Run Status / Message` แยก DC, AC, Transient **ย้ายไปบล็อก `Engine ngspice` ด้านล่างสุด** พร้อม `model`, engine version, `Run timestamp` และตารางหน่วย | test ตรวจคำว่า `Run Status`, `Units used in this page` และลำดับบล็อก; browser อ่าน DOM จริงเห็น 3 แถว `SUCCESS` |
+| ลบข้อความที่ไม่ต้องการ | เอา `Engine detected on this machine: ...` และป้าย `Model assumption: QNPN ...` ออกจาก UI ตามคำขอ (model ยังแสดงในบล็อก `Engine ngspice`) | test ใช้ `assertNotIn` ทั้ง 2 ข้อความ |
 | เอกสารส่งงาน | `README.md`: Lab 04 Commit SHA, `pip install -r requirements.txt`, วิธีติดตั้ง ngspice, 3–5 บรรทัด AI/student | อ่าน README; `git log -1` |
 
 **สถานะตามความจริง:** ตาราง B1–B8 และ screenshot ใน §9.5–§9.6 เป็นหลักฐานของ **รอบก่อนหน้า**
-การเพิ่มรายการข้างบน การกดทวนบน Browser และถ่าย screenshot ใหม่ยัง **ไม่ได้ทำ** —
-ต้องทำก่อนอ้าง PASS รอบสุดท้าย (ตามข้อกำหนด "ห้ามอ้าง PASS ถ้า tool/browser ไม่ได้รันจริง")
+การเพิ่มรายการข้างบน รอบนี้กดทวนบน Browser จริงแล้วเฉพาะการลบ `Engine detected on this machine` /
+`Model assumption` และการย้าย status ไปบล็อก `Engine ngspice` ด้านล่างสุด
+(DOM เห็น 5 block, 3 แถว `SUCCESS`, console error 0, ไม่มีข้อความถูกลบ) แต่ยัง **ไม่ได้ถ่าย
+screenshot ใหม่** — ต้องทำก่อนอ้าง PASS ของ B1–B8 รอบสุดท้าย
+(ตามข้อกำหนด "ห้ามอ้าง PASS ถ้า tool/browser ไม่ได้รันจริง")
 ชุดทดสอบรอบนี้: `Ran 63 tests ... OK` (Flask 3.1.3 ติดตั้งด้วย `pip install --user -r requirements.txt`
 และ ngspice-47 ติดตั้งที่ `%LOCALAPPDATA%\Programs\ngspice-47\Spice64\bin\ngspice_con.exe` แล้ว
 → **ไม่มี test ใดถูก skip** รวม test end-to-end ที่เรียก engine จริง)

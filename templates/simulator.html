@@ -190,39 +190,6 @@
 
   <section class="card sim-card sim-block" id="simulation-plots">
     <h2><span class="sim-block-index">2</span> Simulation &amp; Plots</h2>
-    <p class="note sim-engine-line">
-      Engine detected on this machine: <code class="sim-mono">{{ engine_path }}</code>
-      (ตรวจหา <code>ngspice_con.exe</code> จาก PATH และโฟลเดอร์ติดตั้งที่พบบ่อย)
-    </p>
-    {% if netlist or log_excerpt %}
-    <details class="sim-provenance">
-      <summary>Netlist &amp; engine log — result provenance (หลักฐานแหล่งที่มาของผล)</summary>
-      <p class="note sim-prov-line">
-        <strong>Model:</strong> <code class="sim-mono">{{ model }}</code><br>
-        <strong>Analysis directives:</strong>
-        <code class="sim-mono">{{ analysis_directives }}</code><br>
-        <strong>Engine:</strong> <code class="sim-mono">{{ engine_version }}</code><br>
-        <strong>Run timestamp:</strong> <code class="sim-mono">{{ run_timestamp }}</code>
-      </p>
-      <h4>Netlist sent to ngspice</h4>
-      <pre class="sim-code">{{ netlist }}</pre>
-      <h4>Engine log excerpt</h4>
-      <pre class="sim-code">{{ log_excerpt }}</pre>
-    </details>
-    {% else %}
-    <p class="note sim-prov-line">
-      Model: <code class="sim-mono">{{ model }}</code> ·
-      Directives: <code class="sim-mono">{{ analysis_directives }}</code>
-      (หลังกดรันจะแสดง netlist และ engine log ที่ใช้จริงตรงนี้)
-    </p>
-    {% endif %}
-    <p class="note sim-model-warning">
-      <strong>Model assumption:</strong> <code class="sim-mono">{{ model }}</code> is a teaching
-      model, not a manufacturer part number. If the instructor starter kit specifies a model,
-      use that name and parameters instead.
-      (โมเดลนี้เป็นโมเดลสำหรับการสอน ไม่ใช่ part number จริง — ถ้า Starter Kit ของอาจารย์ระบุ
-      โมเดลไว้ ต้องใช้ชื่อ/พารามิเตอร์ตามนั้น)
-    </p>
     <nav class="sim-tabs" role="group" aria-label="Analysis focus (การวิเคราะห์ที่เน้น)">
       {% for key, info in analyses.items() %}
       <label class="sim-tab">
@@ -234,34 +201,10 @@
       {% endfor %}
     </nav>
 
-    {% if status %}
-    <div class="sim-status-line" role="status">
-      <span class="sim-badge {{ 'ok' if status == 'SUCCESS' else 'error' }}">{{ status }}</span>
-      <span class="sim-status-message">{{ message }}</span>
-      <span class="sim-engine">Engine: {{ engine_version }}</span>
-    </div>
-    <table class="sim-table sim-run-status-table">
-      <thead><tr><th>Analysis</th><th>Directive</th><th>Run Status</th><th>Message</th></tr></thead>
-      <tbody>
-        {% for item in run_statuses %}
-        <tr>
-          <td>{{ item.label }}</td>
-          <td><code class="sim-mono">{{ item.directive }}</code></td>
-          <td><span class="sim-badge {{ 'ok' if item.status == 'SUCCESS' else 'error' }}">{{ item.status }}</span></td>
-          <td>{{ item.message }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% if status == 'ENGINE_NOT_FOUND' %}
-    <p class="sim-remedy"><strong>What to try (ลองทำ):</strong>
-      Install the ngspice console build, or set <code>NGSPICE_ENGINE</code> to the full
-      <code>ngspice_con.exe</code> path, then run again.
-      (ติดตั้ง ngspice แบบ console หรือตั้ง <code>NGSPICE_ENGINE</code> ให้ชี้ถึง path เต็มแล้วรันใหม่)</p>
-    {% endif %}
-    {% else %}
-    <p class="note sim-placeholder">Run simulation to generate both plots.
-      (กดรันการจำลองเพื่อสร้างกราฟทั้งสอง)</p>
+    {% if not status %}
+    <p class="note sim-placeholder">Run simulation to generate both plots —
+      engine status and provenance appear in <strong>Engine ngspice</strong> below.
+      (กดรันการจำลองเพื่อสร้างกราฟ; สถานะ Engine อยู่ในบล็อก Engine ngspice ด้านล่าง)</p>
     {% endif %}
 
     <div class="sim-plot-grid">
@@ -389,6 +332,71 @@
         {% if analytical.warnings %}Warnings: {{ analytical.warnings|join("; ") }}.{% endif %}
       </p>
     </div>
+    {% endif %}
+  </section>
+
+  <section class="card sim-card sim-block" id="engine-ngspice">
+    <h2><span class="sim-block-index">4</span> Engine ngspice</h2>
+    <p class="note sim-prov-line">
+      Model: <code class="sim-mono">{{ model }}</code> ·
+      Engine version: <code class="sim-mono">{{ engine_version }}</code> ·
+      Run timestamp: <code class="sim-mono">{{ run_timestamp }}</code>
+    </p>
+
+    {% if status %}
+    <div class="sim-status-line" role="status">
+      <span class="sim-badge {{ 'ok' if status == 'SUCCESS' else 'error' }}">{{ status }}</span>
+      <span class="sim-status-message">{{ message }}</span>
+    </div>
+    <table class="sim-table sim-run-status-table">
+      <thead><tr><th>Analysis</th><th>Directive</th><th>Run Status</th><th>Message</th></tr></thead>
+      <tbody>
+        {% for item in run_statuses %}
+        <tr>
+          <td>{{ item.label }}</td>
+          <td><code class="sim-mono">{{ item.directive }}</code></td>
+          <td><span class="sim-badge {{ 'ok' if item.status == 'SUCCESS' else 'error' }}">{{ item.status }}</span></td>
+          <td>{{ item.message }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if status == 'ENGINE_NOT_FOUND' %}
+    <p class="sim-remedy"><strong>What to try (ลองทำ):</strong>
+      Install the ngspice console build, or set <code>NGSPICE_ENGINE</code> to the full
+      <code>ngspice_con.exe</code> path, then run again.
+      (ติดตั้ง ngspice แบบ console หรือตั้ง <code>NGSPICE_ENGINE</code> ให้ชี้ถึง path เต็มแล้วรันใหม่)</p>
+    {% endif %}
+    {% else %}
+    <p class="note sim-placeholder">Run simulation to see Run status.
+      (กดรันการจำลองเพื่อดูสถานะการทำงาน)</p>
+    {% endif %}
+
+    <h3>Units used in this page (หน่วยที่ใช้ในหน้านี้)</h3>
+    <table class="sim-table sim-units-table">
+      <thead><tr><th>Item</th><th>Unit</th><th>Shown in</th></tr></thead>
+      <tbody>
+        <tr><td>Resistance — R1/R2/RC/RE/RL</td><td>Ω · kΩ · MΩ</td><td>Circuit &amp; Parameters</td></tr>
+        <tr><td>Source amplitude</td><td>mV · V</td><td>Circuit &amp; Parameters</td></tr>
+        <tr><td>Source frequency</td><td>Hz · kHz · MHz</td><td>Circuit &amp; Parameters</td></tr>
+        <tr><td>DC node voltage / collector current</td><td>V · mA</td><td>DC Operating Point</td></tr>
+        <tr><td>AC gain / phase / sweep frequency</td><td>dB · ° · Hz</td><td>AC Frequency Response</td></tr>
+        <tr><td>Transient time / voltage</td><td>ms · V</td><td>Transient Response</td></tr>
+      </tbody>
+    </table>
+
+    {% if netlist or log_excerpt %}
+    <details class="sim-provenance">
+      <summary>Netlist &amp; engine log — result provenance (หลักฐานแหล่งที่มาของผล)</summary>
+      <p class="note sim-prov-line">
+        <strong>Analysis directives:</strong>
+        <code class="sim-mono">{{ analysis_directives }}</code>
+      </p>
+      <h4>Netlist sent to ngspice</h4>
+      <pre class="sim-code">{{ netlist }}</pre>
+      <h4>Engine log excerpt</h4>
+      <pre class="sim-code">{{ log_excerpt }}</pre>
+    </details>
     {% endif %}
   </section>
 </div>

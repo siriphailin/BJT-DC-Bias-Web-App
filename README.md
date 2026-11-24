@@ -179,14 +179,12 @@ radio เป็นตัวเลือก "focus" เท่านั้น จ�
   รูปแบบสำหรับการสอน ไม่ใช่เส้นที่แต่งขึ้น และไม่มี `<script>` ในหน้า
 - Amplitude/Frequency กำหนดแหล่ง sine สำหรับ Transient; DC ไม่ใช้ และ AC ใช้ drive 1 V คงที่
   ในช่วง 1 Hz–1 MHz
-- ตาราง **Run Status** แยกสถานะของ DC / AC / Transient (พร้อม directive และข้อความ)
-  และ provenance แสดง **Run timestamp** — ไม่ต้องเดาว่าการวิเคราะห์ไหนสำเร็จ
-- มีป้าย **Model assumption** เตือนว่า `QNPN` เป็น teaching model ไม่ใช่ part number จริง
-  (ต้องใช้โมเดลตาม Starter Kit ถ้าอาจารย์ระบุ)
-- หน้าแสดง **path ของ `ngspice_con.exe` ที่ตรวจพบในเครื่อง** (ค้นหาจาก PATH และโฟลเดอร์
-  ติดตั้งที่พบบ่อย เช่น `%LOCALAPPDATA%\Programs\ngspice-*\Spice64\bin`) ที่บล็อก Simulation
-  → ไม่ต้องเดาว่า engine อยู่ที่ไหน; override ได้ด้วย `NGSPICE_ENGINE` (รวมตั้งค่าผิดเพื่อทดสอบ
-  `ENGINE_NOT_FOUND`)
+- บล็อก **Engine ngspice** อยู่ด้านล่างสุดของหน้า รวม **Run status** ของ DC / AC / Transient
+  (พร้อม directive และข้อความ), **model**, **engine version**, **Run timestamp** และตาราง
+  **หน่วยที่ใช้ในหน้า** — ไม่ต้องเดาว่าการวิเคราะห์ไหนสำเร็จ
+- หากต้องการ override engine ให้ตั้ง `NGSPICE_ENGINE` เป็น path เต็มของ `ngspice_con.exe`
+  (เช่น `%LOCALAPPDATA%\Programs\ngspice-47\Spice64\bin\ngspice_con.exe`);
+  ตั้งค่าผิดจะเห็น `ENGINE_NOT_FOUND` แทนผลเก่าค้าง
 - ถ้า `RE=0` หรือ `RL=0` → HTTP 400; ถ้า engine หาย → `ENGINE_NOT_FOUND` + วิธีแก้
   **ไม่แสดงผลเก่าค้าง**
 
