@@ -23,11 +23,20 @@
 <header>
   <h1>BJT DC Bias Calculator — Fixed, Emitter and Voltage Divider
     (คำนวณ DC Bias ของ BJT แบบไบอัสคงที่ อีมิตเตอร์ และแบ่งแรงดัน)</h1>
-  <p>ENG29 2121 · Lab 03 · Electronics Laboratory (ปฏิบัติการอิเล็กทรอนิกส์) ·
-    <a class="sim-link" href="{{ url_for('simulator') }}">Lab 04 CE Amplifier Simulator →</a></p>
+  <p>ENG29 2121 · Lab 03 · Electronics Laboratory (ปฏิบัติการอิเล็กทรอนิกส์)</p>
 </header>
 
 <div class="wrap">
+  <nav class="lab-switch" aria-label="Switch between Lab 03 and Lab 04 (สลับระหว่างแล็บ 3 และแล็บ 4)">
+    <a class="lab-switch-btn active" href="{{ url_for('index') }}" aria-current="page">
+      <span class="lab-switch-en">Lab 03 · DC Bias Calculator</span>
+      <small class="lab-switch-th">คำนวณ DC Bias สามวงจร</small>
+    </a>
+    <a class="lab-switch-btn" href="{{ url_for('simulator') }}">
+      <span class="lab-switch-en">Lab 04 · CE Amplifier Simulator</span>
+      <small class="lab-switch-th">จำลองขยายสัญญาณด้วย ngspice</small>
+    </a>
+  </nav>
   {% if errors %}
   <p class="errors-title" role="alert">Please fix the following (กรุณาแก้ไขข้อมูลต่อไปนี้)</p>
   <ul class="errors">

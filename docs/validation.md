@@ -575,13 +575,14 @@ B7  ENGINE_NOT_FOUND → Engine not ready — NGspice executable not found
 | −3 dB หาไม่เจอต้องไม่แต่งเลข | เรียก `find_low_cutoff(ac_points)` จริง; ไม่พบ → ข้อความ **`not determined in sweep range`** | test ตรวจข้อความ และ test อีกตัวตรวจเลขเมื่อพบจุดตัด |
 | Run Status ต่อ analysis | ตาราง `Analysis / Directive / Run Status / Message` แยก DC, AC, Transient **ย้ายไปบล็อก `Engine ngspice` ด้านล่างสุด** พร้อม `model`, engine version, `Run timestamp` และตารางหน่วย | test ตรวจคำว่า `Run Status`, `Units used in this page` และลำดับบล็อก; browser อ่าน DOM จริงเห็น 3 แถว `SUCCESS` |
 | ลบข้อความที่ไม่ต้องการ | เอา `Engine detected on this machine: ...` และป้าย `Model assumption: QNPN ...` ออกจาก UI ตามคำขอ (model ยังแสดงในบล็อก `Engine ngspice`) | test ใช้ `assertNotIn` ทั้ง 2 ข้อความ |
+| ปุ่มสลับ Lab 03 / Lab 04 | `<nav class="lab-switch">` อยู่เหนือบล็อกแรกของทั้ง 2 หน้า เป็น `<a>` ล้วน ไม่มี JS; หน้าปัจจุบันมี `aria-current="page"` | test ตรวจลำดับก่อน `<section>` และ href ทั้ง 2 ทาง; browser คลิกจริงแล้วไป `/simulator` และ `/` |
 | เอกสารส่งงาน | `README.md`: Lab 04 Commit SHA, `pip install -r requirements.txt`, วิธีติดตั้ง ngspice, 3–5 บรรทัด AI/student | อ่าน README; `git log -1` |
 
 **สถานะตามความจริง:** ตาราง B1–B8 และ screenshot ใน §9.5–§9.6 เป็นหลักฐานของ **รอบก่อนหน้า**
 การเพิ่มรายการข้างบน รอบนี้กดทวนบน Browser จริงแล้วเฉพาะการลบ `Engine detected on this machine` /
-`Model assumption` และการย้าย status ไปบล็อก `Engine ngspice` ด้านล่างสุด
-(DOM เห็น 5 block, 3 แถว `SUCCESS`, console error 0, ไม่มีข้อความถูกลบ) แต่ยัง **ไม่ได้ถ่าย
-screenshot ใหม่** — ต้องทำก่อนอ้าง PASS ของ B1–B8 รอบสุดท้าย
+`Model assumption`, การย้าย status ไปบล็อก `Engine ngspice` ด้านล่างสุด และปุ่มสลับ Lab 03/04
+(DOM เห็น 5 block, 3 แถว `SUCCESS`, console error 0, ไม่มีข้อความถูกลบ; คลิกสลับแล้ว URL เปลี่ยนจริง)
+แต่ยัง **ไม่ได้ถ่าย screenshot ใหม่** — ต้องทำก่อนอ้าง PASS ของ B1–B8 รอบสุดท้าย
 (ตามข้อกำหนด "ห้ามอ้าง PASS ถ้า tool/browser ไม่ได้รันจริง")
 ชุดทดสอบรอบนี้: `Ran 63 tests ... OK` (Flask 3.1.3 ติดตั้งด้วย `pip install --user -r requirements.txt`
 และ ngspice-47 ติดตั้งที่ `%LOCALAPPDATA%\Programs\ngspice-47\Spice64\bin\ngspice_con.exe` แล้ว

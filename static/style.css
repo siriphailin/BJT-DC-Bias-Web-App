@@ -24,6 +24,23 @@ header p{margin:0;color:#ddf0fd;font-size:.92rem}
 
 .wrap{max-width:1120px;margin:0 auto;padding:22px 20px 48px}
 
+/* ปุ่มสลับ Lab 03 / Lab 04 — ลิงก์ HTML ล้วน ไม่มี JavaScript */
+.lab-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 18px}
+.lab-switch-btn{
+  display:flex;flex-direction:column;gap:2px;
+  padding:10px 12px;text-decoration:none;
+  background:#fff;color:#17344b;border:1px solid #c8d8e4;border-radius:8px;
+}
+.lab-switch-btn:hover{background:#eef5fa;border-color:#8fb3cc}
+.lab-switch-btn:focus-visible{outline:2px solid #9dc4e0;outline-offset:2px}
+.lab-switch-en{font-weight:700;font-size:.9rem}
+.lab-switch-th{font-size:.78rem;color:var(--muted)}
+.lab-switch-btn.active{
+  background:#103658;border-color:#103658;color:#fff;
+  box-shadow:inset 0 -3px 0 #0c8078;
+}
+.lab-switch-btn.active .lab-switch-th{color:#c9dcea}
+
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
 
 .card{
@@ -166,14 +183,13 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:18px}
 
 @media (max-width:700px){
   .grid{grid-template-columns:1fr}
+  .lab-switch{grid-template-columns:1fr}
   header{padding:20px 18px}
   .wrap{padding:18px 14px 36px}
   .card{padding:16px 16px}
 }
 
 /* Lab 04 simulator (class ขึ้นต้น sim- เท่านั้น ห้ามกระทบ Lab 03) */
-.sim-link{color:#bfe8f6;text-decoration:underline;font-weight:700}
-.sim-link:hover{color:#fff}
 .sim-wrap{max-width:1180px}
 .sim-card{margin:0 0 18px}
 .sim-card h2{font-size:1.18rem;letter-spacing:-.01em}

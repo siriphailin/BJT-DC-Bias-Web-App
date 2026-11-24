@@ -20,6 +20,14 @@ class TestIndex(unittest.TestCase):
         for field in ("vcc", "r1", "r2", "rc", "re", "beta", "vbe"):
             self.assertIn(f'name="{field}"', body)
 
+    def test_lab_switch_above_first_block(self):
+        body = self.client.get("/").get_data(as_text=True)
+        self.assertIn('class="lab-switch"', body)
+        self.assertIn('href="/simulator"', body)
+        self.assertIn('aria-current="page"', body)
+        self.assertIn("Lab 04 · CE Amplifier Simulator", body)
+        self.assertLess(body.index('class="lab-switch"'), body.index("<section"))
+
 
 class TestCalculate(unittest.TestCase):
     def setUp(self):

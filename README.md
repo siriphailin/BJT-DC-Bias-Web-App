@@ -179,6 +179,8 @@ radio เป็นตัวเลือก "focus" เท่านั้น จ�
   รูปแบบสำหรับการสอน ไม่ใช่เส้นที่แต่งขึ้น และไม่มี `<script>` ในหน้า
 - Amplitude/Frequency กำหนดแหล่ง sine สำหรับ Transient; DC ไม่ใช้ และ AC ใช้ drive 1 V คงที่
   ในช่วง 1 Hz–1 MHz
+- ทั้งสองหน้ามี **ปุ่มสลับ Lab 03 / Lab 04** อยู่เหนือบล็อกแรก (ลิงก์ HTML ล้วน ไม่มี JavaScript;
+  หน้าปัจจุบันทำเครื่องหมาย `aria-current="page"`)
 - บล็อก **Engine ngspice** อยู่ด้านล่างสุดของหน้า รวม **Run status** ของ DC / AC / Transient
   (พร้อม directive และข้อความ), **model**, **engine version**, **Run timestamp** และตาราง
   **หน่วยที่ใช้ในหน้า** — ไม่ต้องเดาว่าการวิเคราะห์ไหนสำเร็จ
