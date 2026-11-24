@@ -619,7 +619,7 @@ Impeccable `detect --json --viewport` สำหรับ B8 และ `impeccabl
 
 | Checklist ที่ส่ง | หลักฐานใน repo | สถานะ |
 |---|---|---|
-| GitHub Repository URL + Commit SHA สำหรับ Lab 04 | [`README.md` → “ลิงก์ส่งงาน”](../README.md): URL `https://github.com/siriphailin/BJT-DC-Bias-Web-App` และ SHA `e34fcaaedad1d35c4c8e24a0af29155c2121e267` (tag `lab04`) | ✅ |
+| GitHub Repository URL + Commit SHA สำหรับ Lab 04 | [`README.md` → “ลิงก์ส่งงาน (Lab 04)”](../README.md): URL `https://github.com/siriphailin/BJT-DC-Bias-Web-App`, SHA โค้ด `e34fcaaedad1d35c4c8e24a0af29155c2121e267` (tag `lab04`) และ SHA หลักฐาน `f9868072b744cf2724b9af0f9ee1d62a0738f504` | ✅ |
 | Flask app มี CE SPICE DC/AC/Transient + DC Bias เดิมทั้ง 3 แบบ | [`app.py`](../app.py): `GET /`, `POST /calculate` (Fixed/Emitter/Divider) และ `GET /simulator`, `POST /simulate`; [`spice_engine.py`](../spice_engine.py) รัน `.op`, `.ac dec 20 1 1Meg`, `.tran`; 64 test ใน [`docs/test-log.md`](test-log.md) | ✅ |
 | `README.md` มีติดตั้ง ngspice/Python dependencies + วิธีรัน server/browser | [`README.md` → “การรัน”, “ติดตั้ง ngspice (Lab 04)”, “การทดสอบ”](../README.md): `pip install -r requirements.txt`, Chocolatey nupkg → `ngspice_con.exe`, `flask --app app run`, `http://127.0.0.1:5000/` และ `/simulator` | ✅ |
 | `docs/validation.md` บันทึก B1–B8, วิธีตรวจ, ผลจริง, แหล่งอ้างอิง, ความคลาดเคลื่อน/ข้อจำกัด | วิธีตรวจ §9.4; ผลจริง §9.5 และ **§9.8 (รอบสุดท้าย)**; แหล่งอ้างอิง §10.1; ความคลาดเคลื่อน/ข้อจำกัด §10.2; screenshot §9.8 | ✅ |
