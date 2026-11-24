@@ -572,6 +572,8 @@ B7  ENGINE_NOT_FOUND → Engine not ready — NGspice executable not found
 | ระบุ Model / Run Status / provenance | กล่อง `Netlist & engine log — result provenance` แสดง `model`, `analysis_directives`, netlist ที่ส่งจริง และ log excerpt; status เดิมยังอยู่ | test ตรวจ `QNPN teaching model`, `.ac dec 20 1 1Meg`, ข้อความ summary |
 | แยก analytical ออกจาก SPICE | กล่อง `Analytical reference — NOT a SPICE result` เรียก `calculate_dc_bias()` จาก `dc_bias.py` แยกจากผล ngspice | test ตรวจข้อความป้าย |
 | −3 dB หาไม่เจอต้องไม่แต่งเลข | เรียก `find_low_cutoff(ac_points)` จริง; ไม่พบ → ข้อความ **`not determined in sweep range`** | test ตรวจข้อความ และ test อีกตัวตรวจเลขเมื่อพบจุดตัด |
+| Run Status ต่อ analysis | ตาราง `Analysis / Directive / Run Status / Message` แยก DC, AC, Transient | test ตรวจคำว่า `Run Status`; browser อ่าน DOM จริงเห็น 3 แถว `SUCCESS` |
+| Model assumption | ป้ายเตือนว่า `QNPN` เป็น teaching model ไม่ใช่ part number จริง | test ตรวจคำว่า `Model assumption` |
 | เอกสารส่งงาน | `README.md`: Lab 04 Commit SHA, `pip install -r requirements.txt`, วิธีติดตั้ง ngspice, 3–5 บรรทัด AI/student | อ่าน README; `git log -1` |
 
 **สถานะตามความจริง:** ตาราง B1–B8 และ screenshot ใน §9.5–§9.6 เป็นหลักฐานของ **รอบก่อนหน้า**

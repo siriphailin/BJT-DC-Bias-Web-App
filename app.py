@@ -348,6 +348,20 @@ def _render_simulator(form, analysis, runs=None, errors=None, status_code=200,
     status, message = _overall_status(runs) if runs else ("", "")
     first = next(iter(runs.values()), None)
 
+    # One honest status row per analysis — overall badge alone hides partial runs.
+    run_statuses = [
+        {
+            "label": info["label"],
+            "directive": info["directive"],
+            "status": runs[key].status if key in runs else "NOT RUN",
+            "message": runs[key].message if key in runs else "",
+        }
+        for key, info in SIM_ANALYSES.items()
+    ]
+    run_timestamp = (
+        first.provenance.get("timestamp", "unavailable") if first else "unavailable"
+    )
+
     # Independent teaching reference — explicitly labelled as NOT a SPICE result.
     analytical = None
     if params is not None:
@@ -378,6 +392,8 @@ def _render_simulator(form, analysis, runs=None, errors=None, status_code=200,
             if first is not None else "unavailable"
         ),
         engine_path=ENGINE_PATH or "not found",
+        run_statuses=run_statuses,
+        run_timestamp=run_timestamp,
         model=first.provenance.get("model", MODEL_LABEL) if first else MODEL_LABEL,
         analysis_directives=" / ".join(
             item["directive"] for item in SIM_ANALYSES.values()

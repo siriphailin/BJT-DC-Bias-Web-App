@@ -71,6 +71,7 @@ class TestSimulatorPage(unittest.TestCase):
         self.assertIn("Simulation &amp; Plots", body)
         self.assertIn("Engineering Results", body)
         self.assertIn("Engine detected on this machine", body)
+        self.assertIn("Model assumption", body)
         self.assertIn('class="sim-mono"', body)
 
     def test_no_client_javascript(self):
@@ -174,6 +175,9 @@ class TestSimulatorPage(unittest.TestCase):
         self.assertIn("QNPN teaching model", body)
         self.assertIn(".ac dec 20 1 1Meg", body)
         self.assertIn("not determined in sweep range", body)
+        self.assertIn("Run Status", body)
+        self.assertIn("Run timestamp", body)
+        self.assertIn("Engine detected on this machine", body)
 
     @patch("app.run_all_for_request")
     @patch("app.find_low_cutoff", return_value=15.8)

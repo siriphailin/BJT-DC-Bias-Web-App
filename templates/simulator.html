@@ -201,7 +201,8 @@
         <strong>Model:</strong> <code class="sim-mono">{{ model }}</code><br>
         <strong>Analysis directives:</strong>
         <code class="sim-mono">{{ analysis_directives }}</code><br>
-        <strong>Engine:</strong> <code class="sim-mono">{{ engine_version }}</code>
+        <strong>Engine:</strong> <code class="sim-mono">{{ engine_version }}</code><br>
+        <strong>Run timestamp:</strong> <code class="sim-mono">{{ run_timestamp }}</code>
       </p>
       <h4>Netlist sent to ngspice</h4>
       <pre class="sim-code">{{ netlist }}</pre>
@@ -215,6 +216,13 @@
       (หลังกดรันจะแสดง netlist และ engine log ที่ใช้จริงตรงนี้)
     </p>
     {% endif %}
+    <p class="note sim-model-warning">
+      <strong>Model assumption:</strong> <code class="sim-mono">{{ model }}</code> is a teaching
+      model, not a manufacturer part number. If the instructor starter kit specifies a model,
+      use that name and parameters instead.
+      (โมเดลนี้เป็นโมเดลสำหรับการสอน ไม่ใช่ part number จริง — ถ้า Starter Kit ของอาจารย์ระบุ
+      โมเดลไว้ ต้องใช้ชื่อ/พารามิเตอร์ตามนั้น)
+    </p>
     <nav class="sim-tabs" role="group" aria-label="Analysis focus (การวิเคราะห์ที่เน้น)">
       {% for key, info in analyses.items() %}
       <label class="sim-tab">
@@ -232,6 +240,19 @@
       <span class="sim-status-message">{{ message }}</span>
       <span class="sim-engine">Engine: {{ engine_version }}</span>
     </div>
+    <table class="sim-table sim-run-status-table">
+      <thead><tr><th>Analysis</th><th>Directive</th><th>Run Status</th><th>Message</th></tr></thead>
+      <tbody>
+        {% for item in run_statuses %}
+        <tr>
+          <td>{{ item.label }}</td>
+          <td><code class="sim-mono">{{ item.directive }}</code></td>
+          <td><span class="sim-badge {{ 'ok' if item.status == 'SUCCESS' else 'error' }}">{{ item.status }}</span></td>
+          <td>{{ item.message }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
     {% if status == 'ENGINE_NOT_FOUND' %}
     <p class="sim-remedy"><strong>What to try (ลองทำ):</strong>
       Install the ngspice console build, or set <code>NGSPICE_ENGINE</code> to the full

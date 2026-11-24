@@ -262,6 +262,9 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:18px}
   font-family:Consolas,"Courier New",monospace;font-size:.76rem;line-height:1.45;
 }
 .sim-cutoff{margin-top:6px}
+.sim-run-status-table{margin:0 0 12px;font-size:.82rem}
+.sim-run-status-table th,.sim-run-status-table td{padding:6px 9px}
+.sim-run-status-table .sim-badge{margin:0;padding:2px 8px;font-size:.72rem}
 .sim-reference{
   border:1px solid #bcd9e2;border-left:4px solid var(--teal);border-radius:0 8px 8px 0;
   background:#f2f8fb;padding:12px 14px;margin:16px 0 0;
