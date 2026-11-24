@@ -392,7 +392,7 @@ A1 ถูกบันทึกไว้ **ก่อน** แก้โค้ด (
 | อธิบายเส้นทางค่า RE ใน A4 ถึงสมการ | ✅ | หัวข้อ 8.6 + คำตอบคำถามปิด Lab |
 | ตรวจ `git diff --staged` ก่อน commit | ✅ | 12 ไฟล์เข้า commit `442c05cd…` แล้ว ไม่มี `.venv` / `.env` / credentials |
 | **นักศึกษาเปิดเว็บเองทำซ้ำ ≥ 1 กรณี** | ⏳ **ยังต้องทำ** | ต้องทำ A4 ด้วยมือแล้วจดวันที่/สิ่งที่เห็น (ข้อ 8.6 ท้ายหัวข้อ) |
-| **GitHub URL + Commit SHA + README วิธีรัน** | ✅ | `README.md` หัวข้อ "ลิงก์ส่งงาน" มี URL, SHA Lab 03 และวิธีตรวจ; push แล้ว (`origin/main` ตรงกับ `HEAD` ตาม SHA ใน README) |
+| **GitHub URL + Commit SHA + README วิธีรัน** | ✅ | `README.md` หัวข้อ "ลิงก์ส่งงาน" มี URL, SHA Lab 03 และวิธีตรวจ; push แล้ว; SHA ของงาน Lab 04 (tag `lab04`) อยู่ใน README, `origin/main` ตรงกับ `HEAD` |
 
 **เกณฑ์ Saturation ปรับให้ตรงใบงาน Lab 03:** ใบงานกำหนดให้เตือนเมื่อ `IB ≤ 0` หรือ `VCE ≤ 0.2 V`
 เดิม Lab 2 ประกาศ `VCE_SAT = 0.3 V` ใน `dc_bias.py` — รอบนี้แก้เป็น **`VCE_SAT = 0.2 V`** ที่

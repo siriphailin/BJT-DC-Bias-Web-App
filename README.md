@@ -38,7 +38,7 @@
 |---|---|
 | GitHub repository | <https://github.com/siriphailin/BJT-DC-Bias-Web-App> |
 | Commit SHA ของ Lab 03 | `442c05cd329660c48b4ca142e22bedc554d99e99` |
-| Commit SHA ของ Lab 04 | `PENDING_LAB04_SHA` |
+| Commit SHA ของ Lab 04 (tag `lab04`) | `7767a3a463054144e0f5471175aab79564bb35f8` |
 | วิธีตรวจผลจริง | **OpenCode Browser** |
 
 ---
