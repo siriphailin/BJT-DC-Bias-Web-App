@@ -577,5 +577,7 @@ B7  ENGINE_NOT_FOUND → Engine not ready — NGspice executable not found
 **สถานะตามความจริง:** ตาราง B1–B8 และ screenshot ใน §9.5–§9.6 เป็นหลักฐานของ **รอบก่อนหน้า**
 การเพิ่มรายการข้างบน การกดทวนบน Browser และถ่าย screenshot ใหม่ยัง **ไม่ได้ทำ** —
 ต้องทำก่อนอ้าง PASS รอบสุดท้าย (ตามข้อกำหนด "ห้ามอ้าง PASS ถ้า tool/browser ไม่ได้รันจริง")
-ชุดทดสอบรอบนี้: `Ran 63 tests ... OK` เมื่อรันด้วย Python ที่มี Flask ติดตั้งแล้ว
+ชุดทดสอบรอบนี้: `Ran 63 tests ... OK` (Flask 3.1.3 ติดตั้งด้วย `pip install --user -r requirements.txt`
+และ ngspice-47 ติดตั้งที่ `%LOCALAPPDATA%\Programs\ngspice-47\Spice64\bin\ngspice_con.exe` แล้ว
+→ **ไม่มี test ใดถูก skip** รวม test end-to-end ที่เรียก engine จริง)
 
