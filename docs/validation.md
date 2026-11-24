@@ -387,7 +387,7 @@ A1 ถูกบันทึกไว้ **ก่อน** แก้โค้ด (
 | หลักฐานจากหน้าเว็บ ≥ 1 กรณี | ✅ | ภาพ 4 ไฟล์ (A1, A2, A3, A5) + ข้อความที่คัดจากหน้าเว็บ |
 | ระบุวิธีตรวจจริง (Playwright MCP / OpenCode Browser / Manual) | ✅ | `README.md` บรรทัด 39 ระบุ **OpenCode Browser**, หัวข้อ 8.3 มีตารางวิธีตรวจ |
 | อธิบายบทบาท MCP (MCP Client / MCP Server) | ✅ | หัวข้อ 8.3: OpenCode = MCP Client, Playwright MCP = MCP Server, Browser ↔ Flask เป็น HTTP คนละเส้นทาง (เครื่องนี้ใช้ OpenCode Browser แทนตามข้อ 05) |
-| ระบุ AI สร้างส่วนไหน นักศึกษาตรวจอะไร | ✅ | หัวข้อ 8.7 + `README.md` |
+| ระบุ AI สร้างส่วนไหน นักศึกษาตรวจอะไร | ✅ | หัวข้อ 8.7 |
 | ระบุโค้ดเลือกฟังก์ชันและแปลงหน่วยอยู่ที่ไหน | ✅ | หัวข้อ 8.7 + `README.md` |
 | อธิบายเส้นทางค่า RE ใน A4 ถึงสมการ | ✅ | หัวข้อ 8.6 + คำตอบคำถามปิด Lab |
 | ตรวจ `git diff --staged` ก่อน commit | ✅ | 12 ไฟล์เข้า commit `442c05cd…` แล้ว ไม่มี `.venv` / `.env` / credentials |
@@ -557,7 +557,7 @@ B7  ENGINE_NOT_FOUND → Engine not ready — NGspice executable not found
 | Critique (layout เดิม) | รัน Assessment A (design review) และ Assessment B (detector + screenshot) แบบแยก sub-agent ตาม reference ของ Impeccable v0.1.27 | A: Nielsen 25/40, cognitive load สูง, 3 P1 (tab reset, ไม่มี schematic, AC caveat/cutoff ไม่ชัด); B: detector 4 findings ใน markup scan |
 | Polish (layout เดิม) | tab เปลี่ยนจาก `<a href>` เป็น `<button formmethod="get">`; `GET /simulator` อ่านค่าจาก query; เพิ่ม schematic; range hint; remedy ของ engine หาย | 15/20 Good; `.impeccable/audit/2026-11-24T08-45-44Z__project.md` (รายงาน nàyอธิบาย **ก่อน redesign** เท่านั้น) |
 | Redesign (รอบปัจจุบัน) | เปลี่ยนเป็น 3 blocks ตามที่ผู้ขอระบุ; radio `DC/AC/Transient` แทน GET-tab; run ครั้งเดียวได้ 3 analysis; เพิ่ม `RL`, source units, schematic voltage-divider ใหม่, แสดง engine path | `app.py`, `spice_engine.py`, `templates/simulator.html`, `static/style.css`, tests; 62 tests ผ่าน; browser ตรวจ B1–B7 ใหม่ |
-| ปรับตาม Checklist (รอบสุดท้าย) | เอา `analytical`/`netlist`/`log` กลับมาแบบแยกป้าย, เพิ่ม IC, −3 dB, README install/SHA/AI-student | `app.py`, `templates/simulator.html`, `static/style.css`, tests, `README.md`; 64 tests ผ่าน; browser ทวนรอบสุดท้ายใน §9.8 |
+| ปรับตาม Checklist (รอบสุดท้าย) | เอา `analytical`/`netlist`/`log` กลับมาแบบแยกป้าย, เพิ่ม IC, −3 dB, README install/SHA | `app.py`, `templates/simulator.html`, `static/style.css`, tests, `README.md`; 64 tests ผ่าน; browser ทวนรอบสุดท้ายใน §9.8 |
 | Detect (หลัง redesign) | `impeccable detect --json http://127.0.0.1:5000/simulator` และ `shot --viewport 1280x900,390x844` | เหลือ advisory/warning (`straggler`, `em-dash-overuse`, `nested-cards`) ไม่มี primary finding เรื่อง overflow หรือ tap target; screenshot ใหม่สองไฟล์ในตาราง 9.5 |
 
 > ข้อมูลในหัวข้อ 9.2–9.3 เป็น **result จาก ngspice จริง** ที่ใช้ validate parser ส่วนหัวข้อ 9.5

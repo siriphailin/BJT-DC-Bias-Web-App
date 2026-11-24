@@ -201,17 +201,6 @@ radio เป็นตัวเลือก "focus" เท่านั้น จ�
 `docs/screenshots/lab04-final-desktop-1280x900.png` และ
 `lab04-final-phone-390x844.png` (หัวข้อ 9.5–9.7 เป็นหลักฐานรอบก่อนหน้า)
 
-### AI สร้าง/เปลี่ยนอะไร — นักศึกษาตรวจอะไร (Lab 04)
-
-- **AI:** เขียน `spice_engine.py` (netlist, ngspice adapter, parser, SVG), route `/simulate`,
-  หน้า 3 blocks, ปรับ layout ด้วย Impeccable, และเขียนชุดทดสอบ Lab 04
-- **AI:** เพิ่ม/แก้ตาม Checklist ล่าสุด — คอลัมน์ IC, provenance (model/directive/netlist/log),
-  analytical reference แยกป้าย, ข้อความ `not determined in sweep range`, README + validation
-- **นักศึกษา:** ตรวจเองว่าค่าในตาราง DC ตรงกับ `.print op`, เปลี่ยน RE/RL/source แล้วกราฟขยับ,
-  ทวน B3 หรือ B6 ด้วยมือ 1 รอบ และเปิดหน้า 1280×900/390×844 ดูว่าปุ่ม/กราฟไม่ตัด
-- **นักศึกษา:** ตรวจว่า `README.md` มี Lab 04 Commit SHA + วิธี `pip install` + วิธีติดตั้ง ngspice
-  แล้ว push ขึ้น GitHub ก่อนส่ง
-
 > ความถูกต้อง: ตาราง B1–B8 ใน §9.5–§9.7 เป็นของรอบก่อนหน้า; ผลทวนกับโค้ดสุดท้าย
 > (รวม IC/provenance/analytical/−3 dB, บล็อก Engine ngspice และปุ่มสลับแล็บ)
 > อยู่ใน **§9.8** พร้อม screenshot ใหม่ — ตรวจด้วย browser จริงและชุดทดสอบ 64 ตัวแล้ว
