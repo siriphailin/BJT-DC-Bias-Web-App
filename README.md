@@ -38,7 +38,7 @@
 |---|---|
 | GitHub repository | <https://github.com/siriphailin/BJT-DC-Bias-Web-App> |
 | Commit SHA ของ Lab 03 | `442c05cd329660c48b4ca142e22bedc554d99e99` |
-| Commit SHA ของ Lab 04 (tag `lab04`) | `e34fcaaedad1d35c4c8e24a0af29155c2121e267` |
+| Commit SHA ของ Lab 04 (tag `lab04`) | [`e34fcaaedad1d35c4c8e24a0af29155c2121e267`](https://github.com/siriphailin/BJT-DC-Bias-Web-App/commit/e34fcaaedad1d35c4c8e24a0af29155c2121e267) |
 | วิธีตรวจผลจริง | **OpenCode Browser** |
 
 ---
@@ -162,7 +162,7 @@ Impeccable v0.1.27 เป็นเครื่องมือพัฒนา UI 
    `Transient Response` (Vin / Vout / Time) และกล่อง
    **Analytical reference — NOT a SPICE result** แยกต่างหากจากผล ngspice
 
-กด Run ครั้งเดียวแล้ว Flask รันทั้งสอง analysis จริงใน temp dir แล้ว render ทุกกราฟ/ตารางพร้อมกัน
+กด Run ครั้งเดียวแล้ว Flask รันทั้งสาม analysis (`.op/.ac/.tran`) จริงใน temp dir แล้ว render ทุกกราฟ/ตารางพร้อมกัน
 radio เป็นตัวเลือก "focus" เท่านั้น จึงสลับได้โดยไม่ reload หรือล้างผลที่แสดงอยู่
 
 | Analysis | คำสั่งจริงใน netlist | ผลที่ render |
@@ -213,7 +213,7 @@ BJT DC Bias Web App/
 ├── dc_bias.py              # สมการ DC Bias ทั้งสามโหมด (ไม่ import Flask)
 ├── spice_engine.py         # validate → netlist → ngspice → parser → SVG (ไม่ import Flask)
 ├── templates/index.html    # Lab 03 UI (แก้เพียงเพิ่มลิงก์ไป /simulator)
-├── templates/simulator.html# Lab 04 UI: 3 blocks, schematic, unit selects, 2 plots, 3 tables
+├── templates/simulator.html# Lab 04 UI: intro + 4 blocks, schematic, unit selects, 2 plots, 3 tables
 ├── static/style.css        # Lab 03 styles + .sim-* styles
 ├── tests/                  # unittest 64 ตัว (20 เดิม + 44 ของ Lab 04)
 ├── docs/                   # design-note, validation, screenshots, spec/plan

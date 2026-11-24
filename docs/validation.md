@@ -403,7 +403,7 @@ A1 ถูกบันทึกไว้ **ก่อน** แก้โค้ด (
 
 ---
 
-## 9. Lab 04 — BJT CE Amplifier Simulator (redesigned 3 blocks)
+## 9. Lab 04 — BJT CE Amplifier Simulator (redesigned 5 sections)
 
 ### 9.1 สภาพแวดล้อมที่ตรวจจริง (2026-11-24)
 
@@ -612,4 +612,37 @@ Impeccable `detect --json --viewport` สำหรับ B8 และ `impeccabl
 
 > หมายเหตุ: B1–B8 ใน §9.5–§9.7 เป็นหลักฐานของรอบก่อนหน้า; ตารางนี้คือผลทวนกับโค้ดที่ push จริง
 > (`e34fcaa`) และเป็นแหล่งที่ควรใช้อ้าง PASS รอบสุดท้าย
+
+---
+
+## 10. Submission checklist (Lab 04)
+
+| Checklist ที่ส่ง | หลักฐานใน repo | สถานะ |
+|---|---|---|
+| GitHub Repository URL + Commit SHA สำหรับ Lab 04 | [`README.md` → “ลิงก์ส่งงาน”](../README.md): URL `https://github.com/siriphailin/BJT-DC-Bias-Web-App` และ SHA `e34fcaaedad1d35c4c8e24a0af29155c2121e267` (tag `lab04`) | ✅ |
+| Flask app มี CE SPICE DC/AC/Transient + DC Bias เดิมทั้ง 3 แบบ | [`app.py`](../app.py): `GET /`, `POST /calculate` (Fixed/Emitter/Divider) และ `GET /simulator`, `POST /simulate`; [`spice_engine.py`](../spice_engine.py) รัน `.op`, `.ac dec 20 1 1Meg`, `.tran`; 64 test ใน [`docs/test-log.md`](test-log.md) | ✅ |
+| `README.md` มีติดตั้ง ngspice/Python dependencies + วิธีรัน server/browser | [`README.md` → “การรัน”, “ติดตั้ง ngspice (Lab 04)”, “การทดสอบ”](../README.md): `pip install -r requirements.txt`, Chocolatey nupkg → `ngspice_con.exe`, `flask --app app run`, `http://127.0.0.1:5000/` และ `/simulator` | ✅ |
+| `docs/validation.md` บันทึก B1–B8, วิธีตรวจ, ผลจริง, แหล่งอ้างอิง, ความคลาดเคลื่อน/ข้อจำกัด | วิธีตรวจ §9.4; ผลจริง §9.5 และ **§9.8 (รอบสุดท้าย)**; แหล่งอ้างอิง §10.1; ความคลาดเคลื่อน/ข้อจำกัด §10.2; screenshot §9.8 | ✅ |
+
+### 10.1 แหล่งอ้างอิงที่ใช้ตรวจ
+
+| แหล่ง | ใช้เพื่อ |
+|---|---|
+| ใบงานต้นฉบับ `Lab04_BJT_Amplifier_Simulator_2-2569 (1).html` (ไฟล์ในเครื่องผู้ใช้) | กำหนด B1–B8, โครงหน้า, ค่าเริ่มต้น และข้อกำหนด provenance |
+| [`docs/superpowers/specs/2026-11-24-lab04-bjt-amplifier-simulator-design.md`](superpowers/specs/2026-11-24-lab04-bjt-amplifier-simulator-design.md), [`docs/superpowers/plans/2026-11-24-lab04-bjt-amplifier-simulator.md`](superpowers/plans/2026-11-24-lab04-bjt-amplifier-simulator.md) | spec/plan ที่แปลงจากใบงานก่อนเขียนโค้ด |
+| Netlist + engine log excerpt ที่แสดงในหน้า `Netlist & engine log — result provenance` และ smoke test §9.2 | ยืนยันว่าผลมาจาก `ngspice-47` จริง ไม่ใช่ค่าฮาร์ดโค้ด |
+| [`dc_bias.py`](../dc_bias.py) + สมการ/คำนวณมือ §2–§4 | analytical reference แยกต่างหาก ติดป้าย **NOT a SPICE result** |
+| [`docs/test-log.md`](test-log.md), screenshot ใน §9.8, `git tag lab04` | หลักฐานรัน 64 test, browser จริง และ commit ส่งงาน |
+
+### 10.2 ความคลาดเคลื่อนและข้อจำกัด (ต้องอ่านก่อนให้คะแนน)
+
+| ประเด็น | รายละเอียดตามความจริง |
+|---|---|
+| Analytical ≠ SPICE | `IC 1.230 mA / VCE 8.052 V` ( DC Bias แบบ `VBE=0.70 V`, ไม่คิด Early effect) ต่างจาก `IC 1.278 mA / VCE 7.900 V` จาก ngspice เพราะ SPICE ใช้ `VBE≈0.6597 V` จาก diode equation + Early effect **ไม่ใช่ bug** และห้ามนำค่าสองชุดมาปนกัน |
+| AC เป็นแบบจำลองการสอน | ใช้ `QNPN BF=100 IS=1E-14 VAF=100 RB=0 CJE=CJC=TF=TR=0`; gain/phase มาจาก coupling capacitor + model นี้ ไม่ใช่ capacitance ภายในทรานซิสเตอร์จริง หรือ measurement |
+| Playwright MCP | **NOT RUN** เพราะโปรเจกต์ไม่ได้ตั้งค่า Playwright MCP server — ใช้ OpenCode Browser แทนตามที่บันทึกไว้ใน §9.4 |
+| Manual recheck | ในรอบสุดท้ายนักศึกษา **ยังไม่ได้ทวน B3/B6 ด้วยมือ** ตามที่ใบงานแนะนำ ควรทำเพิ่มเอง 1 กรณี |
+| Responsive evidence | 390 px เป็น Impeccable headless render ไม่ใช่การจับอุปกรณ์จริง; browser harness ที่โต้ตอบจริงมี viewport 532×840 (§9.4) และ `detect` เหลือ advisory/warning (failure 0) ไม่ใช่ “ไม่มี finding เลย” |
+| Error case ที่จงใจ | B7 มี console error `HTTP 400` เพราะส่ง `RE=0` ตั้งใจ เพื่อยืนยันว่าไม่แสดงผลเก่า — ไม่ใช่ error ของแอป |
+| Engine | ต้องใช้ `ngspice_con.exe`; ถ้า path ผิด/ไม่มี engine หน้าแสดง `ENGINE_NOT_FOUND` แทนผลปลอม |
 
