@@ -194,6 +194,27 @@
       Engine detected on this machine: <code class="sim-mono">{{ engine_path }}</code>
       (ตรวจหา <code>ngspice_con.exe</code> จาก PATH และโฟลเดอร์ติดตั้งที่พบบ่อย)
     </p>
+    {% if netlist or log_excerpt %}
+    <details class="sim-provenance">
+      <summary>Netlist &amp; engine log — result provenance (หลักฐานแหล่งที่มาของผล)</summary>
+      <p class="note sim-prov-line">
+        <strong>Model:</strong> <code class="sim-mono">{{ model }}</code><br>
+        <strong>Analysis directives:</strong>
+        <code class="sim-mono">{{ analysis_directives }}</code><br>
+        <strong>Engine:</strong> <code class="sim-mono">{{ engine_version }}</code>
+      </p>
+      <h4>Netlist sent to ngspice</h4>
+      <pre class="sim-code">{{ netlist }}</pre>
+      <h4>Engine log excerpt</h4>
+      <pre class="sim-code">{{ log_excerpt }}</pre>
+    </details>
+    {% else %}
+    <p class="note sim-prov-line">
+      Model: <code class="sim-mono">{{ model }}</code> ·
+      Directives: <code class="sim-mono">{{ analysis_directives }}</code>
+      (หลังกดรันจะแสดง netlist และ engine log ที่ใช้จริงตรงนี้)
+    </p>
+    {% endif %}
     <nav class="sim-tabs" role="group" aria-label="Analysis focus (การวิเคราะห์ที่เน้น)">
       {% for key, info in analyses.items() %}
       <label class="sim-tab">
@@ -234,6 +255,15 @@
           {{ "%.1f"|format(ac_summary.phase_1k_deg) }}° ·
           {{ ac_summary.points }} points.
         </p>
+        <p class="note sim-cutoff">
+          Low −3 dB frequency:
+          {% if low_cutoff_hz is not none %}
+          <strong>{{ "%.1f"|format(low_cutoff_hz) }} Hz</strong>
+          {% else %}
+          <strong>not determined in sweep range</strong>
+          (ไม่พบจุดตัด −3 dB ในช่วงที่สแกน 1 Hz–1 MHz — ไม่ได้แต่งตัวเลข)
+          {% endif %}
+        </p>
         {% endif %}
       </article>
       <article class="sim-plot">
@@ -261,16 +291,17 @@
         <h3>DC Operating Point</h3>
         {% if dc_values %}
         <table class="sim-table">
-          <thead><tr><th>VB</th><th>VE</th><th>VC</th><th>VCE</th></tr></thead>
+          <thead><tr><th>VB</th><th>VE</th><th>VC</th><th>VCE</th><th>IC</th></tr></thead>
           <tbody><tr>
             <td class="val">{{ "%.3f"|format(dc_values.vb) }} V</td>
             <td class="val">{{ "%.3f"|format(dc_values.ve) }} V</td>
             <td class="val">{{ "%.3f"|format(dc_values.vc) }} V</td>
             <td class="val"><strong>{{ "%.3f"|format(dc_values.vce) }} V</strong></td>
+            <td class="val">{{ "%.3f"|format(dc_values.ic_mA) }} mA</td>
           </tr></tbody>
         </table>
         {% else %}
-        <p class="sim-placeholder">Run simulation to see VB · VE · VC · VCE.
+        <p class="sim-placeholder">Run simulation to see VB · VE · VC · VCE · IC.
           (กดรันเพื่อดูค่าจุดทำงาน)</p>
         {% endif %}
       </article>
@@ -311,6 +342,33 @@
         {% endif %}
       </article>
     </div>
+
+    {% if analytical %}
+    <div class="sim-reference">
+      <h3>Analytical reference — NOT a SPICE result
+        (ค่าอ้างอิงเชิงวิเคราะห์ — ไม่ใช่ผลจาก SPICE)</h3>
+      <p class="note">
+        Independent teaching calculation from <code class="sim-mono">dc_bias.py</code>
+        (VTH/RTH, β·IB) shown separately so it is never confused with the ngspice values above.
+        (คำนวณแยกจากสมการใน <code>dc_bias.py</code> แสดงแยกต่างหากเพื่อไม่ให้สับสนกับผล ngspice)
+      </p>
+      <table class="sim-table">
+        <thead><tr><th>VB</th><th>VE</th><th>VC</th><th>VCE</th><th>IC</th><th>Region</th></tr></thead>
+        <tbody><tr>
+          <td class="val">{{ "%.3f"|format(analytical.vb) }} V</td>
+          <td class="val">{{ "%.3f"|format(analytical.ve) }} V</td>
+          <td class="val">{{ "%.3f"|format(analytical.vc) }} V</td>
+          <td class="val">{{ "%.3f"|format(analytical.vce) }} V</td>
+          <td class="val">{{ "%.3f"|format(analytical.ic * 1000.0) }} mA</td>
+          <td>{{ analytical.region }}</td>
+        </tr></tbody>
+      </table>
+      <p class="note">
+        β = {{ "%.0f"|format(analytical_beta) }} · VBE = {{ "%.2f"|format(analytical_vbe) }} V.
+        {% if analytical.warnings %}Warnings: {{ analytical.warnings|join("; ") }}.{% endif %}
+      </p>
+    </div>
+    {% endif %}
   </section>
 </div>
 

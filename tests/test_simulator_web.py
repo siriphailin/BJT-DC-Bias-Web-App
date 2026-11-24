@@ -166,9 +166,23 @@ class TestSimulatorPage(unittest.TestCase):
         self.assertIn("DC Operating Point", body)
         self.assertIn("AC Frequency Response", body)
         self.assertIn("Transient Response", body)
-        self.assertNotIn("NOT a SPICE result", body)
-        self.assertNotIn("Netlist &amp; engine log", body)
-        self.assertNotIn("circuit.cir", body)
+        self.assertIn("NOT a SPICE result", body)
+        self.assertIn("Netlist &amp; engine log", body)
+        self.assertIn("fake netlist for route test", body)
+        self.assertIn("<th>IC</th>", body)
+        self.assertIn("1.278", body)
+        self.assertIn("QNPN teaching model", body)
+        self.assertIn(".ac dec 20 1 1Meg", body)
+        self.assertIn("not determined in sweep range", body)
+
+    @patch("app.run_all_for_request")
+    @patch("app.find_low_cutoff", return_value=15.8)
+    def test_success_shows_low_cutoff_when_found(self, cutoff, run):
+        run.return_value = fake_runs("SUCCESS")
+        body = self.client.post("/simulate", data=VALID).get_data(as_text=True)
+        self.assertIn("15.8 Hz", body)
+        self.assertNotIn("not determined in sweep range", body)
+        cutoff.assert_called_once()
 
     @patch("app.run_all_for_request")
     def test_success_renders_both_illustrative_plots(self, run):
@@ -197,7 +211,7 @@ class TestSimulatorPage(unittest.TestCase):
         self.assertNotIn("SUCCESS", body)
         self.assertNotIn("1.949", body)
         self.assertNotIn("4.8", body)
-        self.assertNotIn("NOT a SPICE result", body)
+        self.assertIn("NOT a SPICE result", body)
 
     @unittest.skipUnless(REAL_ENGINE.is_file(), "ngspice not installed")
     def test_real_end_to_end(self):

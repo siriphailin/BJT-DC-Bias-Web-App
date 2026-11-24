@@ -32,19 +32,24 @@
 
 ---
 
-## ลิงก์ส่งงาน (Lab 03)
+## ลิงก์ส่งงาน
 
 | รายการ | ค่า |
 |---|---|
 | GitHub repository | <https://github.com/siriphailin/BJT-DC-Bias-Web-App> |
 | Commit SHA ของ Lab 03 | `442c05cd329660c48b4ca142e22bedc554d99e99` |
+| Commit SHA ของ Lab 04 | `PENDING_LAB04_SHA` |
 | วิธีตรวจผลจริง | **OpenCode Browser** |
 
 ---
 
 ## การรัน (Run)
 
-```bash
+```powershell
+# 1) ติดตั้ง dependency ของ Flask (ครั้งแรกหรือหลัง clone ใหม่)
+python -m pip install -r requirements.txt
+
+# 2) รัน server
 python -m flask --app app run --debug
 ```
 
@@ -53,10 +58,29 @@ python -m flask --app app run --debug
 - Lab 03 DC Bias: **<http://127.0.0.1:5000/>**
 - Lab 04 CE Amplifier Simulator: **<http://127.0.0.1:5000/simulator>**
 
-Lab 04 ต้องการ `ngspice_con.exe` (console build) เท่านั้น — `ngspice.exe` แบบ GUI ไม่คืน
-output ให้ subprocess โปรแกรมจะหาเองที่ `%LOCALAPPDATA%\Programs\ngspice-47\Spice64\bin\ngspice_con.exe`
-หรือกำหนด path เองด้วยตัวแปรสภาพแวดล้อม `NGSPICE_ENGINE` (ถ้าตั้งค่าผิดจะแสดง
-`ENGINE_NOT_FOUND` พร้อมวิธีแก้ แทนการใช้ผลเก่าหรือผลปลอม)
+### ติดตั้ง ngspice (Lab 04)
+
+ต้องการ `ngspice_con.exe` (console build) เท่านั้น — `ngspice.exe` แบบ GUI ไม่คืน
+output ให้ subprocess วิธีติดตั้งที่ใช้จริงบนเครื่องนี้ (winget ไม่มีแพ็กเกจ):
+
+```powershell
+# เปิด PowerShell แบบ "Run as administrator" (กด Yes ตอน UAC แล้วใส่รหัสเครื่องเอง)
+$pkg = "$env:TEMP\ngspice.47.0.0.nupkg"
+$work = "$env:TEMP\ngspice-setup"
+Invoke-WebRequest -Uri https://community.chocolatey.org/api/v2/package/ngspice/47.0.0 -OutFile $pkg
+New-Item -ItemType Directory -Force $work | Out-Null
+tar -xf $pkg -C $work
+tar -xf "$work\tools\ngspice-47_64.7z" -C "$work\tools"
+
+$target = "$env:LOCALAPPDATA\Programs\ngspice-47"
+New-Item -ItemType Directory -Force $target | Out-Null
+Copy-Item "$work\tools\Spice64" -Destination $target -Recurse -Force
+& "$target\Spice64\bin\ngspice_con.exe" -v
+```
+
+หรือติดตั้งใน `%LOCALAPPDATA%\Programs\` (ไม่ต้อง UAC) แล้วตั้ง `NGSPICE_ENGINE` ชี้ไปที่
+`ngspice_con.exe` เต็ม path ก็ได้ โปรแกรมค้นหาจาก PATH และโฟลเดอร์ติดตั้งที่พบบ่อยเอง
+ถ้าตั้ง path ผิดจะแสดง `ENGINE_NOT_FOUND` พร้อมวิธีแก้ แทนการใช้ผลเก่าหรือผลปลอม
 
 ถ้าไม่ได้ activate venv ให้ใช้:
 
@@ -72,7 +96,7 @@ output ให้ subprocess โปรแกรมจะหาเองที่ 
 python -m unittest discover -s tests -v
 ```
 
-ผลที่ต้องได้: **`Ran 62 tests` … `OK`** (20 เดิมของ Lab 03 + 42 ของ Lab 04)
+ผลที่ต้องได้: **`Ran 63 tests` … `OK`** (20 เดิมของ Lab 03 + 43 ของ Lab 04)
 
 ชุดทดสอบแบ่งเป็นสี่ชั้น
 
@@ -81,7 +105,7 @@ python -m unittest discover -s tests -v
 | `tests/test_dc_bias.py` | 14 | สมการ, การแปลงหน่วย, การปฏิเสธค่าผิด, การแบ่ง Region และ warning |
 | `tests/test_web.py` | 6 | Flask route เดิม: `GET /` 200, `POST /calculate` 200/400, ค่าที่คำนวณขึ้นหน้าเว็บ |
 | `tests/test_spice_engine.py` | 28 | validation (รวม RL และหน่วยของ Source), netlist, parser, error status, ngspice จริง, SVG |
-| `tests/test_simulator_web.py` | 14 | `/simulator`, `/simulate`, ไม่มี JS, 3 radio, ชื่อบล็อกใหม่, schematic กล่องอิมพิแดนซ์+วงกลม BJT+ลูกศร Vin+rail สั้น+ไม่มีตัวเลข, success/error render, กราฟ/ตารางครบ, end-to-end จริง |
+| `tests/test_simulator_web.py` | 15 | `/simulator`, `/simulate`, ไม่มี JS, 3 radio, ชื่อบล็อกใหม่, schematic กล่องอิมพิแดนซ์+วงกลม BJT+ลูกศร Vin+rail สั้น+ไม่มีตัวเลข, success/error render, กราฟ/ตารางครบ, IC + provenance + analytical + −3 dB, end-to-end จริง |
 
 > ชุดทดสอบ SPICE ที่เรียก engine จริงจะ `skip` อัตโนมัติถ้าไม่พบ `ngspice_con.exe` ตำแหน่งด้านบน
 
@@ -131,20 +155,26 @@ Impeccable v0.1.27 เป็นเครื่องมือพัฒนา UI 
    และปุ่ม Run simulation
 2. **Simulation & Plots** — radio `DC` / `AC` / `Transient`, กราฟ
    `Bode response (illustrative)` และ `Input/Output waveforms (illustrative)`
-3. **Engineering Results** — `DC Operating Point` (VB · VE · VC · VCE),
-   `AC Frequency Response` (Gain / Phase / Frequency), `Transient Response` (Vin / Vout / Time)
+3. **Engineering Results** — `DC Operating Point` (VB · VE · VC · VCE · **IC** จาก `.print op`),
+   `AC Frequency Response` (Gain / Phase / Frequency + **low −3 dB frequency**),
+   `Transient Response` (Vin / Vout / Time) และกล่อง
+   **Analytical reference — NOT a SPICE result** แยกต่างหากจากผล ngspice
 
 กด Run ครั้งเดียวแล้ว Flask รันทั้งสอง analysis จริงใน temp dir แล้ว render ทุกกราฟ/ตารางพร้อมกัน
 radio เป็นตัวเลือก "focus" เท่านั้น จึงสลับได้โดยไม่ reload หรือล้างผลที่แสดงอยู่
 
 | Analysis | คำสั่งจริงใน netlist | ผลที่ render |
 |---|---|---|
-| DC | `.op` + `.print op` | VB, VE, VC, VCE จากตาราง log จริง |
-| AC | `.ac dec 20 1 1Meg` | Bode gain (dB) + phase (°) จาก `.print ac` |
+| DC | `.op` + `.print op` | VB, VE, VC, VCE, **IC** จากตาราง log จริง |
+| AC | `.ac dec 20 1 1Meg` | Bode gain (dB) + phase (°) จาก `.print ac`; −3 dB ใช้ interpolation หรือข้อความ `not determined in sweep range` |
 | Transient | `.tran` + `.print tran` | Vin/Vout vs time (ms) จาก `.print tran` |
 
-- หน้า redesigned **ไม่มี** ส่วน analytical reference หรือ netlist/engine log อีกต่อไป
-  (ตามคำขอ) — ค่าที่เหลือมาจาก ngspice เท่านั้น
+- หน้าแสดง **Model (`QNPN` teaching), analysis directives, netlist และ engine log excerpt**
+  ในส่วน `Netlist & engine log — result provenance` เพื่อให้ตรวจได้ว่าผลมาจากการรันจริง
+  (ไม่ใช่ค่าฮาร์ดโค้ด) ตามที่ใบงานกำหนด
+- ค่าอ้างอิงเชิงวิเคราะห์จาก `dc_bias.py` แสดงในกล่องแยกที่ติดป้าย
+  **“Analytical reference — NOT a SPICE result”** เพื่อไม่ให้สับสนกับผล ngspice
+  (separate provenance ตามใบงาน)
 - กราฟเป็น **SVG ที่ Python สร้างจากจุดข้อมูล SPICE จริง** คำว่า "illustrative" หมายถึง
   รูปแบบสำหรับการสอน ไม่ใช่เส้นที่แต่งขึ้น และไม่มี `<script>` ในหน้า
 - Amplitude/Frequency กำหนดแหล่ง sine สำหรับ Transient; DC ไม่ใช้ และ AC ใช้ drive 1 V คงที่
@@ -165,6 +195,21 @@ radio เป็นตัวเลือก "focus" เท่านั้น จ�
 `docs/screenshots/lab04-redesign-desktop-1280x900.png` และ
 `lab04-redesign-phone-390x844.png`
 
+### AI สร้าง/เปลี่ยนอะไร — นักศึกษาตรวจอะไร (Lab 04)
+
+- **AI:** เขียน `spice_engine.py` (netlist, ngspice adapter, parser, SVG), route `/simulate`,
+  หน้า 3 blocks, ปรับ layout ด้วย Impeccable, และเขียนชุดทดสอบ Lab 04
+- **AI:** เพิ่ม/แก้ตาม Checklist ล่าสุด — คอลัมน์ IC, provenance (model/directive/netlist/log),
+  analytical reference แยกป้าย, ข้อความ `not determined in sweep range`, README + validation
+- **นักศึกษา:** ตรวจเองว่าค่าในตาราง DC ตรงกับ `.print op`, เปลี่ยน RE/RL/source แล้วกราฟขยับ,
+  ทวน B3 หรือ B6 ด้วยมือ 1 รอบ และเปิดหน้า 1280×900/390×844 ดูว่าปุ่ม/กราฟไม่ตัด
+- **นักศึกษา:** ตรวจว่า `README.md` มี Lab 04 Commit SHA + วิธี `pip install` + วิธีติดตั้ง ngspice
+  แล้ว push ขึ้น GitHub ก่อนส่ง
+
+> หมายเหตุความถูกต้อง: ภาพหน้าจอและตาราง B1–B8 ใน `docs/validation.md` ถ่ายก่อนการเพิ่ม
+> IC/provenance/analytical/−3 dB รอบล่าสุด; ส่วนที่เพิ่มใหม่ตรวจด้วยชุดทดสอบ 63 ตัวแล้ว
+> การกดทวนบน Browser รอบสุดท้ายยังรอทำ (ดู §9.7)
+
 ## โครงสร้างไฟล์
 
 ```
@@ -175,7 +220,7 @@ BJT DC Bias Web App/
 ├── templates/index.html    # Lab 03 UI (แก้เพียงเพิ่มลิงก์ไป /simulator)
 ├── templates/simulator.html# Lab 04 UI: 3 blocks, schematic, unit selects, 2 plots, 3 tables
 ├── static/style.css        # Lab 03 styles + .sim-* styles
-├── tests/                  # unittest 62 ตัว (20 เดิม + 42 ของ Lab 04)
+├── tests/                  # unittest 63 ตัว (20 เดิม + 43 ของ Lab 04)
 ├── docs/                   # design-note, validation, screenshots, spec/plan
 ├── requirements.txt
 ├── AGENTS.md               # conventions สำหรับ AI coding agent

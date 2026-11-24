@@ -247,6 +247,28 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:18px}
 .sim-result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
 .sim-result .sim-table th,.sim-result .sim-table td{padding:7px 8px;font-size:.85rem}
 
+/* Lab 04 provenance + separately labelled analytical reference */
+.sim-provenance{
+  border:1px solid var(--line);border-radius:6px;background:#f8fbfe;
+  padding:8px 12px;margin:0 0 14px;font-size:.86rem;
+}
+.sim-provenance summary{cursor:pointer;font-weight:700;color:#113c60}
+.sim-prov-line{margin:8px 0 4px;overflow-wrap:anywhere}
+.sim-provenance h4{font-size:.82rem;margin:10px 0 4px;color:#113c60}
+.sim-code{
+  background:#fff;border:1px solid #d3e0ec;border-radius:5px;
+  padding:8px 10px;margin:0;max-height:220px;overflow:auto;
+  white-space:pre-wrap;overflow-wrap:anywhere;
+  font-family:Consolas,"Courier New",monospace;font-size:.76rem;line-height:1.45;
+}
+.sim-cutoff{margin-top:6px}
+.sim-reference{
+  border:1px solid #bcd9e2;border-left:4px solid var(--teal);border-radius:0 8px 8px 0;
+  background:#f2f8fb;padding:12px 14px;margin:16px 0 0;
+}
+.sim-reference h3{font-size:.94rem;margin:0 0 8px;color:#0d5a4d}
+.sim-reference .note{margin-top:8px}
+
 @media (max-width:900px){
   .sim-groups{grid-template-columns:1fr}
   .sim-plot-grid{grid-template-columns:1fr}

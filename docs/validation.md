@@ -155,7 +155,7 @@ VCE = 9.29431 − 1.24216  = 8.05216 V
 ## 7. วิธีตรวจซ้ำด้วยตัวเอง
 
 ```bash
-# รันชุดทดสอบทั้งหมด (54 ตัว: Lab 03 20 + Lab 04 34)
+# รันชุดทดสอบทั้งหมด (63 ตัว: Lab 03 20 + Lab 04 43)
 python -m unittest discover -s tests -v
 
 # ตรวจค่าตัวอย่างจากใบงานด้วยมือ
@@ -392,7 +392,7 @@ A1 ถูกบันทึกไว้ **ก่อน** แก้โค้ด (
 | อธิบายเส้นทางค่า RE ใน A4 ถึงสมการ | ✅ | หัวข้อ 8.6 + คำตอบคำถามปิด Lab |
 | ตรวจ `git diff --staged` ก่อน commit | ✅ | 12 ไฟล์เข้า commit `442c05cd…` แล้ว ไม่มี `.venv` / `.env` / credentials |
 | **นักศึกษาเปิดเว็บเองทำซ้ำ ≥ 1 กรณี** | ⏳ **ยังต้องทำ** | ต้องทำ A4 ด้วยมือแล้วจดวันที่/สิ่งที่เห็น (ข้อ 8.6 ท้ายหัวข้อ) |
-| **GitHub URL + Commit SHA + README วิธีรัน** | ✅ | `README.md` บรรทัด 35–39 มี URL, SHA `442c05cd329660c48b4ca142e22bedc554d99e99` และวิธีตรวจ; push แล้ว (`origin/main` = `dd248eb`) |
+| **GitHub URL + Commit SHA + README วิธีรัน** | ✅ | `README.md` หัวข้อ "ลิงก์ส่งงาน" มี URL, SHA Lab 03 และวิธีตรวจ; push แล้ว (`origin/main` ตรงกับ `HEAD` ตาม SHA ใน README) |
 
 **เกณฑ์ Saturation ปรับให้ตรงใบงาน Lab 03:** ใบงานกำหนดให้เตือนเมื่อ `IB ≤ 0` หรือ `VCE ≤ 0.2 V`
 เดิม Lab 2 ประกาศ `VCE_SAT = 0.3 V` ใน `dc_bias.py` — รอบนี้แก้เป็น **`VCE_SAT = 0.2 V`** ที่
@@ -488,8 +488,10 @@ frequency   vdb(vin)    vp(vin)
 
 หน้า `/simulator` หลัง redesign มีบล็อกเกริ่นนำบนสุด `CE Amplifier Lab: DC Bias / AC / Transient`
 แล้วตามด้วย `<h2>` ลำดับ `1 Circuit & Parameters`, `2 Simulation & Plots`, `3 Engineering Results`
-ไม่มีข้อความ `NOT a SPICE result` และไม่มี `Netlist & engine log` อีกต่อไป
 DOM มี `<script>` จำนวน **0** และ console level=error ว่างทุกครั้งที่ตรวจ
+ในรอบ redesign ดั้งเดิมตัด `NOT a SPICE result` และ `Netlist & engine log` ออกตามคำขอ
+แต่รอบปรับให้ตรง Checklist ของใบงานได้เพิ่มทั้งสองส่วนกลับมา (ดู §9.7 — ผล browser ในตารางด้านล่าง
+เป็นของรอบก่อนหน้าการเพิ่มนี้)
 ค่าคงที่เริ่มต้น: `VCC=12 V`, `R1=100 kΩ`, `R2=22 kΩ`, `RC=2.2 kΩ`, `RE=1 kΩ`,
 `RL=10 kΩ`, `amplitude=10 mV peak`, `frequency=1 kHz`; model `QNPN` แบบ teaching-only
 กด Run ครั้งเดียวรัน `.op/.ac/.tran` จริงแล้ว render 3 ตาราง + 2 กราฟพร้อมกัน
@@ -523,7 +525,7 @@ DOM มี `<script>` จำนวน **0** และ console level=error ว่
 - กด radio `tran` แล้ว checked เปลี่ยนเป็น `tran`, active tab เดียวคือ `Transient waveform`,
   ค่าฟอร์ม (`vcc=12`, `rl=10`, `amplitude=10`, `frequency=1`) ไม่เปลี่ยน และหลังรันตารางยังครบ
   3 + `<polyline>` 4 → radio เป็น focus เท่านั้น ไม่ reload/ล้างผล
-- ชุดทดสอบหลัง redesign: **`Ran 62 tests ... OK`** (เพิ่ม test ตรวจบล็อกเกริ่นนำบนสุด + ชื่อ `Circuit & Parameters` เดิม, กล่องอิมพิแดนซ์, วงกลม BJT, ลูกศร Vin, rail VCC สั้น และไม่มีตัวเลขบนสัญลักษณ์)
+- ชุดทดสอบหลัง redesign: **`Ran 62 tests ... OK`** (เพิ่ม test ตรวจบล็อกเกริ่นนำบนสุด + ชื่อ `Circuit & Parameters` เดิม, กล่องอิมพิแดนซ์, วงกลม BJT, ลูกศร Vin, rail VCC สั้น และไม่มีตัวเลขบนสัญลักษณ์) — รอบปรับตาม Checklist เพิ่มอีก 1 ตัว รวม **63** (ดู §9.7)
 
 หลักฐานภาพจาก browser/CLI จริง (หลัง redesign):
 
@@ -553,9 +555,27 @@ B7  ENGINE_NOT_FOUND → Engine not ready — NGspice executable not found
 |---|---|---|
 | Critique (layout เดิม) | รัน Assessment A (design review) และ Assessment B (detector + screenshot) แบบแยก sub-agent ตาม reference ของ Impeccable v0.1.27 | A: Nielsen 25/40, cognitive load สูง, 3 P1 (tab reset, ไม่มี schematic, AC caveat/cutoff ไม่ชัด); B: detector 4 findings ใน markup scan |
 | Polish (layout เดิม) | tab เปลี่ยนจาก `<a href>` เป็น `<button formmethod="get">`; `GET /simulator` อ่านค่าจาก query; เพิ่ม schematic; range hint; remedy ของ engine หาย | 15/20 Good; `.impeccable/audit/2026-11-24T08-45-44Z__project.md` (รายงาน nàyอธิบาย **ก่อน redesign** เท่านั้น) |
-| Redesign (รอบปัจจุบัน) | เปลี่ยนเป็น 3 blocks ตามที่ผู้ขอระบุ; radio `DC/AC/Transient` แทน GET-tab; run ครั้งเดียวได้ 3 analysis; ตัด analytical + netlist/log; เพิ่ม `RL`, source units, schematic voltage-divider ใหม่, แสดง engine path | `app.py`, `spice_engine.py`, `templates/simulator.html`, `static/style.css`, tests; 62 tests ผ่าน; browser ตรวจ B1–B7 ใหม่ |
+| Redesign (รอบปัจจุบัน) | เปลี่ยนเป็น 3 blocks ตามที่ผู้ขอระบุ; radio `DC/AC/Transient` แทน GET-tab; run ครั้งเดียวได้ 3 analysis; เพิ่ม `RL`, source units, schematic voltage-divider ใหม่, แสดง engine path | `app.py`, `spice_engine.py`, `templates/simulator.html`, `static/style.css`, tests; 62 tests ผ่าน; browser ตรวจ B1–B7 ใหม่ |
+| ปรับตาม Checklist (รอบสุดท้าย) | เอา `analytical`/`netlist`/`log` กลับมาแบบแยกป้าย, เพิ่ม IC, −3 dB, README install/SHA/AI-student | `app.py`, `templates/simulator.html`, `static/style.css`, tests, `README.md`; 63 tests ผ่าน; browser รอทวน (§9.7) |
 | Detect (หลัง redesign) | `impeccable detect --json http://127.0.0.1:5000/simulator` และ `shot --viewport 1280x900,390x844` | เหลือ advisory/warning (`straggler`, `em-dash-overuse`, `nested-cards`) ไม่มี primary finding เรื่อง overflow หรือ tap target; screenshot ใหม่สองไฟล์ในตาราง 9.5 |
 
 > ข้อมูลในหัวข้อ 9.2–9.3 เป็น **result จาก ngspice จริง** ที่ใช้ validate parser ส่วนหัวข้อ 9.5
 > เป็นหลักฐานจาก UI จริงหลังรันโปรแกรมแล้ว
+
+### 9.7 รอบปรับให้ตรง Checklist ของใบงาน (หลัง screenshot ชุดเดิม)
+
+สิ่งที่เพิ่ม/แก้หลังการถ่าย screenshot ใน §9.5 (ตรวจด้วยชุดทดสอบ ไม่ได้อ้างว่า browser ทวนใหม่แล้ว):
+
+| รายการที่ใบงานต้องการ | สิ่งที่เพิ่มจริง | วิธีตรวจ |
+|---|---|---|
+| B2 ต้องเห็น `VB/VE/VC/VCE/IC` | ตาราง `DC Operating Point` เพิ่มคอลัมน์ **IC** (mA) จาก `parse_op()["ic_mA"]` | `tests/test_simulator_web.py` ตรวจ `<th>IC</th>` และค่า `1.278` |
+| ระบุ Model / Run Status / provenance | กล่อง `Netlist & engine log — result provenance` แสดง `model`, `analysis_directives`, netlist ที่ส่งจริง และ log excerpt; status เดิมยังอยู่ | test ตรวจ `QNPN teaching model`, `.ac dec 20 1 1Meg`, ข้อความ summary |
+| แยก analytical ออกจาก SPICE | กล่อง `Analytical reference — NOT a SPICE result` เรียก `calculate_dc_bias()` จาก `dc_bias.py` แยกจากผล ngspice | test ตรวจข้อความป้าย |
+| −3 dB หาไม่เจอต้องไม่แต่งเลข | เรียก `find_low_cutoff(ac_points)` จริง; ไม่พบ → ข้อความ **`not determined in sweep range`** | test ตรวจข้อความ และ test อีกตัวตรวจเลขเมื่อพบจุดตัด |
+| เอกสารส่งงาน | `README.md`: Lab 04 Commit SHA, `pip install -r requirements.txt`, วิธีติดตั้ง ngspice, 3–5 บรรทัด AI/student | อ่าน README; `git log -1` |
+
+**สถานะตามความจริง:** ตาราง B1–B8 และ screenshot ใน §9.5–§9.6 เป็นหลักฐานของ **รอบก่อนหน้า**
+การเพิ่มรายการข้างบน การกดทวนบน Browser และถ่าย screenshot ใหม่ยัง **ไม่ได้ทำ** —
+ต้องทำก่อนอ้าง PASS รอบสุดท้าย (ตามข้อกำหนด "ห้ามอ้าง PASS ถ้า tool/browser ไม่ได้รันจริง")
+ชุดทดสอบรอบนี้: `Ran 63 tests ... OK` เมื่อรันด้วย Python ที่มี Flask ติดตั้งแล้ว
 

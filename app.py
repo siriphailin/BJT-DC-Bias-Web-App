@@ -20,6 +20,8 @@ from dc_bias import (
     parse_resistance,
 )
 from spice_engine import (
+    MODEL_LABEL,
+    find_low_cutoff,
     resolve_engine,
     run_analysis,
     svg_bode,
@@ -332,7 +334,8 @@ def _tran_summary(points) -> dict:
     }
 
 
-def _render_simulator(form, analysis, runs=None, errors=None, status_code=200):
+def _render_simulator(form, analysis, runs=None, errors=None, status_code=200,
+                      params=None):
     """Build one template context; every failure clears result/series to None."""
     runs = runs or {}
     successful = {key: item for key, item in runs.items() if item.status == "SUCCESS"}
@@ -344,10 +347,18 @@ def _render_simulator(form, analysis, runs=None, errors=None, status_code=200):
 
     status, message = _overall_status(runs) if runs else ("", "")
     first = next(iter(runs.values()), None)
-    engine_version = (
-        first.provenance.get("engine_version", "unavailable")
-        if first is not None else "unavailable"
-    )
+
+    # Independent teaching reference — explicitly labelled as NOT a SPICE result.
+    analytical = None
+    if params is not None:
+        try:
+            analytical = calculate_dc_bias(
+                vcc=params.vcc, r1=params.r1, r2=params.r2,
+                rc=params.rc, re=params.re,
+                beta=float(DEFAULTS["beta"]), vbe=float(DEFAULTS["vbe"]),
+            )
+        except BiasInputError:
+            analytical = None
 
     return render_template(
         "simulator.html",
@@ -362,8 +373,21 @@ def _render_simulator(form, analysis, runs=None, errors=None, status_code=200):
         tran_summary=_tran_summary(tran_points),
         status=status,
         message=message,
-        engine_version=engine_version,
+        engine_version=(
+            first.provenance.get("engine_version", "unavailable")
+            if first is not None else "unavailable"
+        ),
         engine_path=ENGINE_PATH or "not found",
+        model=first.provenance.get("model", MODEL_LABEL) if first else MODEL_LABEL,
+        analysis_directives=" / ".join(
+            item["directive"] for item in SIM_ANALYSES.values()
+        ),
+        netlist=first.netlist if first else "",
+        log_excerpt=first.log_excerpt if first else "",
+        low_cutoff_hz=find_low_cutoff(ac_points),
+        analytical=analytical,
+        analytical_beta=float(DEFAULTS["beta"]),
+        analytical_vbe=float(DEFAULTS["vbe"]),
     ), status_code
 
 
@@ -404,4 +428,6 @@ def simulate():
     if errors:
         return _render_simulator(submitted, analysis, errors=errors, status_code=400)
 
-    return _render_simulator(submitted, analysis, runs=run_all_for_request(params))
+    return _render_simulator(
+        submitted, analysis, runs=run_all_for_request(params), params=params
+    )
