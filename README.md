@@ -1,7 +1,8 @@
-# BJT DC Bias Web App — Fixed, Emitter and Voltage Divider
+# BJT DC Bias Web App — Lab 03 + Lab 04 CE Amplifier Simulator
 
 เครื่องคำนวณ **DC Bias** ของทรานซิสเตอร์ BJT แบบ Common Emitter **สามวงจรไบอัส**
-ป้อนที่ขา Base — งาน Lab 03 รายวิชา ENG29 2121 Electronics Laboratory
+ป้อนที่ขา Base (Lab 03) และ **เครื่องจำลองขยายสัญญาณ CE ด้วย ngspice จริง** (Lab 04)
+รายวิชา ENG29 2121 Electronics Laboratory
 (ต่อยอดจาก Lab 02 ที่มีเฉพาะวงจรแบ่งแรงดัน)
 
 | โหมด | อินพุตตัวต้านทาน | สมการกระแส Base |
@@ -47,7 +48,15 @@
 python -m flask --app app run --debug
 ```
 
-แล้วเปิด Browser ไปที่ **<http://127.0.0.1:5000/>**
+แล้วเปิด Browser:
+
+- Lab 03 DC Bias: **<http://127.0.0.1:5000/>**
+- Lab 04 CE Amplifier Simulator: **<http://127.0.0.1:5000/simulator>**
+
+Lab 04 ต้องการ `ngspice_con.exe` (console build) เท่านั้น — `ngspice.exe` แบบ GUI ไม่คืน
+output ให้ subprocess โปรแกรมจะหาเองที่ `%LOCALAPPDATA%\Programs\ngspice-47\Spice64\bin\ngspice_con.exe`
+หรือกำหนด path เองด้วยตัวแปรสภาพแวดล้อม `NGSPICE_ENGINE` (ถ้าตั้งค่าผิดจะแสดง
+`ENGINE_NOT_FOUND` พร้อมวิธีแก้ แทนการใช้ผลเก่าหรือผลปลอม)
 
 ถ้าไม่ได้ activate venv ให้ใช้:
 
@@ -63,14 +72,25 @@ python -m flask --app app run --debug
 python -m unittest discover -s tests -v
 ```
 
-ผลที่ต้องได้: **`Ran 20 tests` … `OK`**
+ผลที่ต้องได้: **`Ran 62 tests` … `OK`** (20 เดิมของ Lab 03 + 42 ของ Lab 04)
 
-ชุดทดสอบแบ่งเป็นสองชั้น
+ชุดทดสอบแบ่งเป็นสี่ชั้น
 
 | ไฟล์ | จำนวน | ตรวจอะไร |
 |---|---|---|
 | `tests/test_dc_bias.py` | 14 | สมการ, การแปลงหน่วย, การปฏิเสธค่าผิด, การแบ่ง Region และ warning |
-| `tests/test_web.py` | 6 | Flask route: `GET /` 200, `POST /calculate` 200/400, ค่าที่คำนวณขึ้นหน้าเว็บ |
+| `tests/test_web.py` | 6 | Flask route เดิม: `GET /` 200, `POST /calculate` 200/400, ค่าที่คำนวณขึ้นหน้าเว็บ |
+| `tests/test_spice_engine.py` | 28 | validation (รวม RL และหน่วยของ Source), netlist, parser, error status, ngspice จริง, SVG |
+| `tests/test_simulator_web.py` | 14 | `/simulator`, `/simulate`, ไม่มี JS, 3 radio, ชื่อบล็อกใหม่, schematic กล่องอิมพิแดนซ์+วงกลม BJT+ลูกศร Vin+rail สั้น+ไม่มีตัวเลข, success/error render, กราฟ/ตารางครบ, end-to-end จริง |
+
+> ชุดทดสอบ SPICE ที่เรียก engine จริงจะ `skip` อัตโนมัติถ้าไม่พบ `ngspice_con.exe` ตำแหน่งด้านบน
+
+Impeccable v0.1.27 เป็นเครื่องมือพัฒนา UI (ไม่ใช่ runtime dependency) ติดตั้งแบบ project-scope
+ใน `.opencode/`; เรียกผ่าน `.opencode\skills\impeccable\scripts\impeccable.cmd`
+รายงาน audit หลัง polish ของ layout ก่อนหน้าอยู่ใน
+`.impeccable/audit/2026-11-24T08-45-44Z__project.md`; หลัง redesign รัน `detect` บน URL จริงอีกครั้ง
+เหลือเฉพาะ advisory/warning (straggler, em-dash, nested-cards) ไม่มี findings เรื่อง overflow
+(ถ้าไม่ต้องการเก็บเครื่องมือนี้ใน repo ให้มนุษย์เพิ่ม `.opencode/` และ `.impeccable/` ลง `.gitignore`)
 
 ---
 
@@ -94,22 +114,77 @@ python -m unittest discover -s tests -v
 ภาพหน้าจอ 4 ไฟล์: [`docs/screenshots/`](docs/screenshots/) — `lab03-A1-baseline.jpeg`,
 `lab03-A2-fixed.jpeg`, `lab03-A3-emitter.jpeg`, `lab03-A5-invalid-input.jpeg`
 
+---
+
+## Lab 04 — CE Amplifier Simulator
+
+หน้า `/simulator` ใช้ **ngspice-47 จริง** กับวงจร voltage-divider bias วงจรเดียว
+(CIN/COUT = 10 µF, RL แก้ได้) และมี **บล็อกเกริ่นนำอยู่บนสุด**
+`CE Amplifier Lab: DC Bias / AC / Transient` ตามด้วย 3 บล็อกตามลำดับ:
+
+1. **Circuit & Parameters** — schematic SVG ของ
+   **BJT voltage-divider common-emitter** (สัญลักษณ์ NPN ในวงกลมเล็ก, ตัวต้านทานเป็น
+   **กล่องอิมพิแดนซ์**, มีลูกศรที่ Vin, R1/R2 divider, RC, RE, CIN/COUT, RL;
+   rail VCC สั้นจาก R1 ถึง RC) **แสดงเฉพาะชื่ออุปกรณ์ ไม่มีตัวเลขกำกับ**
+   (ทำ live update ทุกครั้งที่พิมพ์ไม่ได้เพราะห้ามใช้ JS ฝั่ง client) + ช่องแก้ `Vcc`, `RC`,
+   `R1`, `R2`, `RE`, `RL`, `Source` พร้อมตัวเลือกหน่วย (Ω/kΩ/MΩ, mV/V, Hz/kHz/MHz)
+   และปุ่ม Run simulation
+2. **Simulation & Plots** — radio `DC` / `AC` / `Transient`, กราฟ
+   `Bode response (illustrative)` และ `Input/Output waveforms (illustrative)`
+3. **Engineering Results** — `DC Operating Point` (VB · VE · VC · VCE),
+   `AC Frequency Response` (Gain / Phase / Frequency), `Transient Response` (Vin / Vout / Time)
+
+กด Run ครั้งเดียวแล้ว Flask รันทั้งสอง analysis จริงใน temp dir แล้ว render ทุกกราฟ/ตารางพร้อมกัน
+radio เป็นตัวเลือก "focus" เท่านั้น จึงสลับได้โดยไม่ reload หรือล้างผลที่แสดงอยู่
+
+| Analysis | คำสั่งจริงใน netlist | ผลที่ render |
+|---|---|---|
+| DC | `.op` + `.print op` | VB, VE, VC, VCE จากตาราง log จริง |
+| AC | `.ac dec 20 1 1Meg` | Bode gain (dB) + phase (°) จาก `.print ac` |
+| Transient | `.tran` + `.print tran` | Vin/Vout vs time (ms) จาก `.print tran` |
+
+- หน้า redesigned **ไม่มี** ส่วน analytical reference หรือ netlist/engine log อีกต่อไป
+  (ตามคำขอ) — ค่าที่เหลือมาจาก ngspice เท่านั้น
+- กราฟเป็น **SVG ที่ Python สร้างจากจุดข้อมูล SPICE จริง** คำว่า "illustrative" หมายถึง
+  รูปแบบสำหรับการสอน ไม่ใช่เส้นที่แต่งขึ้น และไม่มี `<script>` ในหน้า
+- Amplitude/Frequency กำหนดแหล่ง sine สำหรับ Transient; DC ไม่ใช้ และ AC ใช้ drive 1 V คงที่
+  ในช่วง 1 Hz–1 MHz
+- หน้าแสดง **path ของ `ngspice_con.exe` ที่ตรวจพบในเครื่อง** (ค้นหาจาก PATH และโฟลเดอร์
+  ติดตั้งที่พบบ่อย เช่น `%LOCALAPPDATA%\Programs\ngspice-*\Spice64\bin`) ที่บล็อก Simulation
+  → ไม่ต้องเดาว่า engine อยู่ที่ไหน; override ได้ด้วย `NGSPICE_ENGINE` (รวมตั้งค่าผิดเพื่อทดสอบ
+  `ENGINE_NOT_FOUND`)
+- ถ้า `RE=0` หรือ `RL=0` → HTTP 400; ถ้า engine หาย → `ENGINE_NOT_FOUND` + วิธีแก้
+  **ไม่แสดงผลเก่าค้าง**
+
+**สมมติฐานของโมเดล (สำคัญ):** `QNPN` คือโมเดลสำหรับการสอน
+`BF=100 IS=1E-14 VAF=100 RB=0 CJE=CJC=TF=TR=0` ไม่ใช่ part number ของทรานซิสเตอร์จริง
+และกราฟ AC ส่วนใหญ่สะท้อนตัวเก็บประจุคู่จ่าย ไม่ใช่ capacitance ภายในทรานซิสเตอร์
+
+ผลตรวจ B1–B8 หลัง redesign ด้วย OpenCode Browser และ Impeccable CLI อยู่ใน
+[`docs/validation.md`](docs/validation.md) (หัวข้อ 9) ภาพหน้าจอใหม่คือ
+`docs/screenshots/lab04-redesign-desktop-1280x900.png` และ
+`lab04-redesign-phone-390x844.png`
+
 ## โครงสร้างไฟล์
 
 ```
 BJT DC Bias Web App/
-├── app.py               # Flask routes: GET / (เลือกโหมด), POST /calculate (เลือกฟังก์ชันตามโหมด)
-├── dc_bias.py           # สมการ DC Bias ทั้งสามโหมด (ไม่ import Flask)
-├── templates/index.html # ปุ่มเลือกโหมด 3 ปุ่ม + ฟอร์มครบทุกช่อง + แผนภาพ SVG + ผลลัพธ์ (Jinja)
-├── static/style.css     # layout, badge, warning
-├── tests/               # unittest 20 ตัว (ชุดเดิมของ Lab 02 — ตามใบงาน Lab 03 ไม่เพิ่ม test ใหม่)
-├── docs/                # design-note, validation, test-log, screenshots
+├── app.py                  # Lab 03: GET /, POST /calculate | Lab 04: GET /simulator, POST /simulate
+├── dc_bias.py              # สมการ DC Bias ทั้งสามโหมด (ไม่ import Flask)
+├── spice_engine.py         # validate → netlist → ngspice → parser → SVG (ไม่ import Flask)
+├── templates/index.html    # Lab 03 UI (แก้เพียงเพิ่มลิงก์ไป /simulator)
+├── templates/simulator.html# Lab 04 UI: 3 blocks, schematic, unit selects, 2 plots, 3 tables
+├── static/style.css        # Lab 03 styles + .sim-* styles
+├── tests/                  # unittest 62 ตัว (20 เดิม + 42 ของ Lab 04)
+├── docs/                   # design-note, validation, screenshots, spec/plan
 ├── requirements.txt
-└── AGENTS.md            # conventions สำหรับ AI coding agent
+├── AGENTS.md               # conventions สำหรับ AI coding agent
+└── .opencode/              # Impeccable แบบ project-scope (มนุษย์ตัดสินใจ commit หรือ ignore)
 ```
 
-**หลักการสำคัญ:** `app.py` ไม่มีสมการแม้บรรทัดเดียว — มันอ่านค่าจากฟอร์ม แปลงหน่วย
-เลือกฟังก์ชันตาม `mode` แล้วเรียกฟังก์ชันใน `dc_bias.py` สมการทั้งหมดจึงอยู่ที่เดียว
-ถ้าต้องแก้สมการ ให้แก้ที่ `dc_bias.py` ที่เดียว ไม่ต้องแตะ HTML
+**หลักการสำคัญ:** `app.py` ไม่มีสมการ DC bias แม้บรรทัดเดียว — มันอ่านค่าจากฟอร์ม แปลงหน่วย
+เลือกฟังก์ชันตาม `mode` แล้วเรียกฟังก์ชันใน `dc_bias.py`; ส่วน Lab 04 ส่งค่าที่ validate แล้วให้
+`spice_engine.py` เป็นคนสร้าง netlist, เรียก ngspice, parse และ render SVG
+ห้ามฮาร์ดโค้ดผล SPICE หรือกราฟใน template
 
 

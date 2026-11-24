@@ -5,6 +5,10 @@
 สมการทั้งหมดอยู่ใน ``dc_bias.py``
 """
 
+import math
+import tempfile
+from pathlib import Path
+
 from flask import Flask, render_template, request
 
 from dc_bias import (
@@ -14,6 +18,13 @@ from dc_bias import (
     calculate_emitter_bias,
     calculate_fixed_bias,
     parse_resistance,
+)
+from spice_engine import (
+    resolve_engine,
+    run_analysis,
+    svg_bode,
+    svg_waveform,
+    validate_sim_input,
 )
 
 app = Flask(__name__)
@@ -226,3 +237,171 @@ def calculate():
         mode=mode,
         mode_info=MODES[mode],
     )
+
+
+# --- Lab 04: CE amplifier simulator (separate routes; Lab 03 ด้านบนไม่ถูกแตะ) ---
+
+SIM_ANALYSES = {
+    "dc": {"label": "DC", "thai": "จุดทำงาน DC", "directive": ".op"},
+    "ac": {"label": "AC", "thai": "ตอบสนองความถี่ AC",
+           "directive": ".ac dec 20 1 1Meg"},
+    "tran": {"label": "Transient", "thai": "รูปคลื่นตามเวลา",
+             "directive": ".tran"},
+}
+
+SIM_FIELDS = (
+    "analysis", "vcc",
+    "r1", "r1_unit", "r2", "r2_unit", "rc", "rc_unit", "re", "re_unit",
+    "rl", "rl_unit", "amplitude", "amplitude_unit",
+    "frequency", "frequency_unit",
+)
+
+SIM_DEFAULTS = {
+    "analysis": "dc", "vcc": "12",
+    "r1": "100", "r1_unit": "kohm", "r2": "22", "r2_unit": "kohm",
+    "rc": "2.2", "rc_unit": "kohm", "re": "1", "re_unit": "kohm",
+    "rl": "10", "rl_unit": "kohm",
+    "amplitude": "10", "amplitude_unit": "mv",
+    "frequency": "1", "frequency_unit": "khz",
+}
+
+ENGINE_PATH = resolve_engine()
+
+
+def run_analysis_for_request(params, analysis: str):
+    """Run one ngspice analysis in a throwaway directory (kept for callers)."""
+    with tempfile.TemporaryDirectory() as directory:
+        return run_analysis(params, analysis, Path(directory), ENGINE_PATH)
+
+
+def run_all_for_request(params):
+    """Run DC, AC and transient so both plots and all result tables are real."""
+    results = {}
+    with tempfile.TemporaryDirectory() as directory:
+        for key in SIM_ANALYSES:
+            results[key] = run_analysis(
+                params, key, Path(directory) / key, ENGINE_PATH
+            )
+    return results
+
+
+def _overall_status(results: dict) -> tuple[str, str]:
+    """Report one honest status for the three analysis runs."""
+    failures = [item for item in results.values() if item.status != "SUCCESS"]
+    if not failures:
+        return "SUCCESS", "DC, AC and transient analyses complete (รันครบทั้ง 3 การวิเคราะห์)"
+    first = failures[0]
+    if len(failures) == len(results) and all(
+        item.status == first.status for item in failures
+    ):
+        return first.status, first.message
+    return "PARTIAL", (
+        f"{first.status}: {first.message} "
+        "(บางการวิเคราะห์ยังไม่สำเร็จ — ไม่แสดงผลเก่า)"
+    )
+
+
+def _ac_summary(points) -> dict:
+    """One representative AC row: the sweep point nearest to 1 kHz."""
+    if not points:
+        return {}
+    nearest = min(points, key=lambda p: abs(math.log10(p[0] / 1000.0)))
+    return {
+        "midband_db": max(p[1] for p in points),
+        "gain_1k_db": nearest[1],
+        "phase_1k_deg": nearest[2],
+        "freq_1k_hz": nearest[0],
+        "points": len(points),
+    }
+
+
+def _tran_summary(points) -> dict:
+    """One representative transient row at the positive Vin peak."""
+    if not points:
+        return {}
+    peak = max(points, key=lambda p: abs(p[1]))
+    vin = [p[1] for p in points]
+    vout = [p[2] for p in points]
+    return {
+        "vin": peak[1],
+        "vout": peak[2],
+        "time_ms": peak[0] * 1000.0,
+        "vin_pp": max(vin) - min(vin),
+        "vout_pp": max(vout) - min(vout),
+        "points": len(points),
+    }
+
+
+def _render_simulator(form, analysis, runs=None, errors=None, status_code=200):
+    """Build one template context; every failure clears result/series to None."""
+    runs = runs or {}
+    successful = {key: item for key, item in runs.items() if item.status == "SUCCESS"}
+
+    dc_result = successful.get("dc")
+    dc_values = dc_result.values if dc_result is not None else None
+    ac_points = successful["ac"].ac_points if "ac" in successful else ()
+    tran_points = successful["tran"].tran_points if "tran" in successful else ()
+
+    status, message = _overall_status(runs) if runs else ("", "")
+    first = next(iter(runs.values()), None)
+    engine_version = (
+        first.provenance.get("engine_version", "unavailable")
+        if first is not None else "unavailable"
+    )
+
+    return render_template(
+        "simulator.html",
+        form=form,
+        analysis=analysis,
+        analyses=SIM_ANALYSES,
+        errors=errors or [],
+        dc_values=dc_values,
+        bode_svg=svg_bode(ac_points),
+        wave_svg=svg_waveform(tran_points),
+        ac_summary=_ac_summary(ac_points),
+        tran_summary=_tran_summary(tran_points),
+        status=status,
+        message=message,
+        engine_version=engine_version,
+        engine_path=ENGINE_PATH or "not found",
+    ), status_code
+
+
+@app.get("/simulator")
+def simulator():
+    """Render the form with the requested analysis focus selected.
+
+    The three tabs are radio inputs associated with the simulation form, so
+    switching focus never reloads or clears the rendered results.
+    """
+    requested = (request.args.get("analysis") or "dc").strip()
+    analysis = requested if requested in SIM_ANALYSES else "dc"
+    form = {
+        name: (request.args.get(name) or SIM_DEFAULTS[name])
+        for name in SIM_FIELDS
+        if name != "analysis"
+    }
+    form["analysis"] = analysis
+    return _render_simulator(form, analysis)
+
+
+@app.post("/simulate")
+def simulate():
+    submitted = {name: request.form.get(name, "") for name in SIM_FIELDS}
+    analysis = (submitted.get("analysis") or "dc").strip()
+    if analysis not in SIM_ANALYSES:
+        return _render_simulator(
+            submitted, "dc",
+            errors=[
+                "Unknown analysis: choose DC, AC or Transient "
+                "(การวิเคราะห์ไม่ถูกต้อง: เลือก DC, AC หรือ Transient)"
+            ],
+            status_code=400,
+        )
+    submitted["analysis"] = analysis
+
+    params, errors = validate_sim_input(submitted)
+    if errors:
+        return _render_simulator(submitted, analysis, errors=errors, status_code=400)
+
+    return _render_simulator(submitted, analysis, runs=run_all_for_request(params))

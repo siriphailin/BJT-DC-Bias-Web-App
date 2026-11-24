@@ -170,3 +170,89 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:18px}
   .wrap{padding:18px 14px 36px}
   .card{padding:16px 16px}
 }
+
+/* Lab 04 simulator (class ขึ้นต้น sim- เท่านั้น ห้ามกระทบ Lab 03) */
+.sim-link{color:#bfe8f6;text-decoration:underline;font-weight:700}
+.sim-link:hover{color:#fff}
+.sim-wrap{max-width:1180px}
+.sim-card{margin:0 0 18px}
+.sim-card h2{font-size:1.18rem;letter-spacing:-.01em}
+.sim-block{scroll-margin-top:12px}
+.sim-block-index{
+  display:inline-grid;place-items:center;width:26px;height:26px;
+  margin-right:8px;border-radius:50%;background:#103658;color:#fff;
+  font-size:.82rem;vertical-align:1px;
+}
+.sim-schematic{padding:4px 0;margin:10px 0 4px}
+.sim-schematic svg{width:100%;height:auto;display:block;max-width:760px;margin:0 auto}
+.sim-wire line,.sim-wire path{stroke:#1d638b;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.sim-part line,.sim-part circle,.sim-part rect,.sim-part path{stroke:#103658;stroke-width:2;fill:none}
+.sim-node circle{fill:#0c8078}
+.sim-arrow{fill:#103658;stroke:none}
+.sim-label text{font-size:13px;font-weight:700;fill:#17344b}
+.sim-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0 18px}
+.sim-tab{
+  position:relative;display:flex;flex-direction:column;gap:2px;margin:0;width:100%;
+  padding:10px 12px;border:1px solid #c8d8e4;border-radius:8px;
+  background:#f7fafc;color:var(--ink);font-size:.9rem;
+  text-align:left;cursor:pointer;user-select:none;
+}
+.sim-tab input{position:absolute;opacity:0;width:1px;height:1px}
+.sim-tab:hover{background:#eef5fa;border-color:#8fb3cc}
+.sim-tab:focus-within{outline:2px solid #9dc4e0;outline-offset:1px}
+.sim-tab.active,.sim-tab:has(input:checked){
+  background:#103658;border-color:#103658;color:#fff;box-shadow:inset 0 -3px 0 #0c8078;
+}
+.sim-tab.active small,.sim-tab.active span,
+.sim-tab:has(input:checked) small,.sim-tab:has(input:checked) span{color:#fff}
+.sim-tab small{font-size:.76rem;opacity:.85}
+.sim-range{font-size:.76rem;margin:2px 0 8px;color:#48677d}
+.sim-engine-line{background:#f3f8fc;border:1px solid #d3e0ec;border-radius:6px;padding:6px 10px;margin:0 0 12px;overflow-wrap:anywhere}
+.sim-run-note{background:#eef5fa;border:1px solid #c8d8e4;padding:8px 10px;border-radius:6px}
+.sim-status-message{margin:0 0 10px;font-weight:700}
+.sim-remedy{background:#fff8e6;border:1px solid #e8d48a;padding:10px 12px;border-radius:6px;font-size:.86rem}
+.sim-model-warning{background:#f2f8fb;border:1px solid #bcd9e2;padding:8px 10px;border-radius:6px}
+.sim-groups{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:start}
+.sim-group{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:0;min-width:0}
+.sim-group legend{font-size:.88rem;font-weight:700;color:#113c60;padding:0 6px}
+.sim-group label{margin-top:10px}
+.sim-note-first{margin-top:0}
+.sim-group button{margin-top:20px}
+.sim-status-card{border-left:4px solid var(--teal)}
+.sim-badge{
+  display:inline-block;font-size:.8rem;font-weight:700;letter-spacing:.02em;
+  padding:4px 12px;border-radius:999px;margin:0 0 10px;
+}
+.sim-badge.ok{background:#e9f6f2;color:#0f6b5c;border:1px solid #9ed5c8}
+.sim-badge.error{background:#fdeceb;color:#8c2b22;border:1px solid #e8b4b0}
+.sim-mono{font-family:Consolas,"Courier New",monospace;font-size:.9em}
+.sim-table{font-size:.9rem}
+.sim-status-line{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;
+  background:#f8fbfe;border:1px solid var(--line);border-radius:6px;
+  padding:8px 10px;margin:0 0 12px;font-size:.84rem;
+}
+.sim-status-line .sim-badge{margin:0}
+.sim-engine{margin-left:auto;color:var(--muted);font-weight:700}
+.sim-plot-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.sim-plot,.sim-result{
+  min-width:0;border:1px solid var(--line);border-radius:8px;
+  padding:12px 14px;background:#fff;
+}
+.sim-plot h3,.sim-result h3{font-size:.94rem;margin:0 0 8px;color:#113c60}
+.sim-plot svg{width:100%;height:auto;display:block;margin:6px auto 0}
+.sim-no-data,.sim-placeholder{
+  margin:14px 0;color:var(--muted);font-style:italic;font-size:.86rem;
+}
+.sim-result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.sim-result .sim-table th,.sim-result .sim-table td{padding:7px 8px;font-size:.85rem}
+
+@media (max-width:900px){
+  .sim-groups{grid-template-columns:1fr}
+  .sim-plot-grid{grid-template-columns:1fr}
+  .sim-result-grid{grid-template-columns:1fr}
+}
+@media (max-width:700px){
+  .sim-tabs{grid-template-columns:1fr}
+  .sim-engine{margin-left:0;width:100%}
+}

@@ -1,0 +1,320 @@
+{%- macro resistor(name, label_en, label_th) -%}
+<label for="sim-{{ name }}">{{ label_en }} — {{ label_th }}</label>
+<div class="row">
+  <input id="sim-{{ name }}" type="number" step="any" min="0" name="{{ name }}"
+         value="{{ form.get(name, '') }}" required>
+  <select name="{{ name }}_unit" aria-label="{{ label_en }} unit (หน่วยของ {{ label_en }})">
+    <option value="ohm"{% if form.get(name ~ '_unit', 'kohm') == 'ohm' %} selected{% endif %}>Ω</option>
+    <option value="kohm"{% if form.get(name ~ '_unit', 'kohm') == 'kohm' %} selected{% endif %}>kΩ</option>
+    <option value="mohm"{% if form.get(name ~ '_unit', 'kohm') == 'mohm' %} selected{% endif %}>MΩ</option>
+  </select>
+</div>
+{%- endmacro -%}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BJT CE Amplifier Simulator — Lab 04 (เครื่องจำลองขยายสัญญาณ CE)</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <h1>BJT CE Amplifier Simulator — Lab 04
+    (เครื่องจำลองวงจรขยาย Common Emitter ด้วย ngspice)</h1>
+  <p>ENG29 2121 · Electronics Laboratory (ปฏิบัติการอิเล็กทรอนิกส์) ·
+    <a class="sim-link" href="{{ url_for('index') }}">← Lab 03 DC Bias Calculator</a></p>
+</header>
+
+<div class="wrap sim-wrap">
+  {% if errors %}
+  <p class="errors-title" role="alert">Please fix the following (กรุณาแก้ไขข้อมูลต่อไปนี้)</p>
+  <ul class="errors">
+    {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  <section class="card sim-card sim-block" id="ce-amplifier-lab">
+    <h2>CE Amplifier Lab: DC Bias / AC / Transient</h2>
+    <p class="note">
+      Real ngspice results for one voltage-divider CE amplifier: DC bias, AC response and
+      transient waveforms. (ผลจริงจาก ngspice ของวงจร CE แบบแบ่งแรงดันวงจรเดียว:
+      จุดทำงาน DC, ตอบสนอง AC และรูปคลื่นตามเวลา)
+    </p>
+  </section>
+
+  <section class="card sim-card sim-block" id="circuit-parameters">
+    <h2><span class="sim-block-index">1</span> Circuit &amp; Parameters</h2>
+    <p class="note">
+      One voltage-divider CE circuit. Edit any value below, or keep the defaults, then run
+      the simulation. CIN and COUT are fixed at 10 µF.
+      (วงจร CE แบบแบ่งแรงดันวงจรเดียว แก้ค่าได้หรือคงค่าเดิมแล้วกดรัน; CIN/COUT คงที่ 10 µF)
+    </p>
+
+    <div class="sim-schematic">
+      <svg viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg"
+           role="img" aria-labelledby="sim-schem-title sim-schem-desc">
+        <title id="sim-schem-title">BJT voltage-divider common-emitter amplifier schematic</title>
+        <desc id="sim-schem-desc">NPN common-emitter amplifier biased by an R1/R2 voltage
+          divider, with input coupling, collector resistor, emitter resistor, output coupling
+          and a configurable load. Component names only; set their values in the form.</desc>
+
+        <g class="sim-wire">
+          <line x1="250" y1="40" x2="450" y2="40"/>
+          <line x1="70" y1="300" x2="620" y2="300"/>
+          <path d="M330 300 H350 M334 308 H346 M338 316 H342"/>
+        </g>
+
+        <g class="sim-wire">
+          <line x1="70" y1="194" x2="70" y2="300"/>
+          <line x1="70" y1="146" x2="70" y2="120"/>
+          <line x1="70" y1="120" x2="130" y2="120"/>
+          <line x1="142" y1="120" x2="250" y2="120"/>
+          <line x1="250" y1="120" x2="250" y2="170"/>
+          <line x1="250" y1="170" x2="390" y2="170"/>
+
+          <line x1="250" y1="40" x2="250" y2="60"/>
+          <line x1="250" y1="140" x2="250" y2="170"/>
+          <line x1="250" y1="170" x2="250" y2="200"/>
+          <line x1="250" y1="280" x2="250" y2="300"/>
+
+          <line x1="450" y1="40" x2="450" y2="60"/>
+          <path d="M390 154 L422 143 L450 100"/>
+          <path d="M390 186 L422 197 L450 220 L450 250"/>
+          <line x1="450" y1="282" x2="450" y2="300"/>
+
+          <line x1="450" y1="100" x2="520" y2="100"/>
+          <line x1="532" y1="100" x2="600" y2="100"/>
+          <line x1="600" y1="100" x2="600" y2="160"/>
+          <line x1="600" y1="240" x2="600" y2="300"/>
+        </g>
+
+        <g class="sim-part">
+          <circle cx="70" cy="170" r="24" fill="none"/>
+          <path d="M62 170 Q66 160 70 170 T78 170" fill="none"/>
+          <line x1="130" y1="104" x2="130" y2="136"/>
+          <line x1="142" y1="104" x2="142" y2="136"/>
+          <line x1="520" y1="84" x2="520" y2="116"/>
+          <line x1="532" y1="84" x2="532" y2="116"/>
+          <circle cx="400" cy="170" r="34" fill="none"/>
+          <line x1="390" y1="154" x2="390" y2="186"/>
+        </g>
+
+        <g class="sim-part">
+          <rect x="238" y="60" width="24" height="80"/>
+          <rect x="238" y="200" width="24" height="80"/>
+          <rect x="438" y="60" width="24" height="40"/>
+          <rect x="438" y="250" width="24" height="32"/>
+          <rect x="588" y="160" width="24" height="80"/>
+        </g>
+
+        <g class="sim-node">
+          <circle cx="250" cy="170" r="4"/>
+          <circle cx="450" cy="100" r="4"/>
+          <circle cx="450" cy="220" r="4"/>
+          <circle cx="600" cy="100" r="4"/>
+          <path class="sim-arrow" d="M70 151 L75 159 L65 159 Z"/>
+          <path class="sim-arrow" d="M442 214 L454 219 L448 229 Z"/>
+        </g>
+
+        <g class="sim-label">
+          <text x="326" y="24">VCC</text>
+          <text x="20" y="170">VIN</text>
+          <text x="268" y="82">R1</text>
+          <text x="268" y="232">R2</text>
+          <text x="468" y="72">RC</text>
+          <text x="468" y="262">RE</text>
+          <text x="618" y="180">RL</text>
+          <text x="108" y="96">CIN</text>
+          <text x="500" y="76">COUT</text>
+          <text x="330" y="162">B</text>
+          <text x="424" y="126">C</text>
+          <text x="424" y="222">E</text>
+          <text x="350" y="240">Q1 · NPN</text>
+        </g>
+      </svg>
+    </div>
+
+    <form id="sim-form" method="post" action="/simulate" class="sim-form">
+      <div class="sim-groups">
+        <fieldset class="sim-group">
+          <legend>Supply, bias network and load (แหล่งจ่าย วงจรไบอัส และโหลด)</legend>
+          <p class="note sim-range">VCC 0–24 V · R greater than 0 Ω, at most 10 MΩ</p>
+          <label for="sim-vcc">VCC — Supply (แรงดันไฟเลี้ยง)</label>
+          <input id="sim-vcc" type="number" step="any" min="0" max="24" name="vcc"
+                 value="{{ form.get('vcc', '') }}" required>
+          {{ resistor('r1', 'R1 — VCC to Base', 'R1 จาก VCC ไป Base') }}
+          {{ resistor('r2', 'R2 — Base to Ground', 'R2 จาก Base ลงกราวด์') }}
+          {{ resistor('rc', 'RC — VCC to Collector', 'RC จาก VCC ไป Collector') }}
+          {{ resistor('re', 'RE — Emitter to Ground', 'RE จาก Emitter ลงกราวด์') }}
+          {{ resistor('rl', 'RL — Collector load', 'RL ภาระที่ขา Out') }}
+        </fieldset>
+        <fieldset class="sim-group">
+          <legend>Source (แหล่งสัญญาณเข้า)</legend>
+          <p class="note sim-note-first">
+            These set the transient sine source; DC ignores them and the AC sweep uses a fixed
+            1 V drive from 1 Hz to 1 MHz.
+            (ค่ากำหนดแหล่งสัญญาณแบบ sine สำหรับ Transient; DC ไม่ใช้ และ AC ใช้แหล่ง 1 V คงที่
+            ครอบ 1 Hz–1 MHz)
+          </p>
+          <label for="sim-amplitude">Amplitude (แอมปลิจูด)</label>
+          <div class="row">
+            <input id="sim-amplitude" type="number" step="any" min="0" name="amplitude"
+                   value="{{ form.get('amplitude', '10') }}" required>
+            <select name="amplitude_unit" aria-label="Amplitude unit (หน่วยแอมปลิจูด)">
+              <option value="mv"{% if form.get('amplitude_unit', 'mv') == 'mv' %} selected{% endif %}>mV</option>
+              <option value="v"{% if form.get('amplitude_unit', 'mv') == 'v' %} selected{% endif %}>V</option>
+            </select>
+          </div>
+          <p class="note sim-range">1 mV–100 V peak</p>
+          <label for="sim-frequency">Frequency (ความถี่)</label>
+          <div class="row">
+            <input id="sim-frequency" type="number" step="any" min="0" name="frequency"
+                   value="{{ form.get('frequency', '1') }}" required>
+            <select name="frequency_unit" aria-label="Frequency unit (หน่วยความถี่)">
+              <option value="hz"{% if form.get('frequency_unit', 'khz') == 'hz' %} selected{% endif %}>Hz</option>
+              <option value="khz"{% if form.get('frequency_unit', 'khz') == 'khz' %} selected{% endif %}>kHz</option>
+              <option value="mhz"{% if form.get('frequency_unit', 'khz') == 'mhz' %} selected{% endif %}>MHz</option>
+            </select>
+          </div>
+          <p class="note sim-range">100 Hz–100 MHz</p>
+          <p class="note sim-run-note">
+            One click runs DC, AC and transient on the server. Allow up to 30 s.
+            (กดครั้งเดียวรันทั้ง DC, AC และ Transient อาจใช้เวลาถึง 30 วินาที)
+          </p>
+          <button type="submit">Run simulation (รันการจำลอง)</button>
+        </fieldset>
+      </div>
+    </form>
+  </section>
+
+  <section class="card sim-card sim-block" id="simulation-plots">
+    <h2><span class="sim-block-index">2</span> Simulation &amp; Plots</h2>
+    <p class="note sim-engine-line">
+      Engine detected on this machine: <code class="sim-mono">{{ engine_path }}</code>
+      (ตรวจหา <code>ngspice_con.exe</code> จาก PATH และโฟลเดอร์ติดตั้งที่พบบ่อย)
+    </p>
+    <nav class="sim-tabs" role="group" aria-label="Analysis focus (การวิเคราะห์ที่เน้น)">
+      {% for key, info in analyses.items() %}
+      <label class="sim-tab">
+        <input type="radio" name="analysis" value="{{ key }}" form="sim-form"
+               {% if analysis == key %}checked{% endif %}>
+        <span>{{ info.label }}</span>
+        <small>{{ info.thai }}</small>
+      </label>
+      {% endfor %}
+    </nav>
+
+    {% if status %}
+    <div class="sim-status-line" role="status">
+      <span class="sim-badge {{ 'ok' if status == 'SUCCESS' else 'error' }}">{{ status }}</span>
+      <span class="sim-status-message">{{ message }}</span>
+      <span class="sim-engine">Engine: {{ engine_version }}</span>
+    </div>
+    {% if status == 'ENGINE_NOT_FOUND' %}
+    <p class="sim-remedy"><strong>What to try (ลองทำ):</strong>
+      Install the ngspice console build, or set <code>NGSPICE_ENGINE</code> to the full
+      <code>ngspice_con.exe</code> path, then run again.
+      (ติดตั้ง ngspice แบบ console หรือตั้ง <code>NGSPICE_ENGINE</code> ให้ชี้ถึง path เต็มแล้วรันใหม่)</p>
+    {% endif %}
+    {% else %}
+    <p class="note sim-placeholder">Run simulation to generate both plots.
+      (กดรันการจำลองเพื่อสร้างกราฟทั้งสอง)</p>
+    {% endif %}
+
+    <div class="sim-plot-grid">
+      <article class="sim-plot">
+        <h3>Bode response (illustrative)</h3>
+        {{ bode_svg|safe }}
+        {% if ac_summary %}
+        <p class="note">
+          Peak ≈ {{ "%.2f"|format(ac_summary.midband_db) }} dB ·
+          @{{ "%.0f"|format(ac_summary.freq_1k_hz) }} Hz =
+          {{ "%.2f"|format(ac_summary.gain_1k_db) }} dB /
+          {{ "%.1f"|format(ac_summary.phase_1k_deg) }}° ·
+          {{ ac_summary.points }} points.
+        </p>
+        {% endif %}
+      </article>
+      <article class="sim-plot">
+        <h3>Input/Output waveforms (illustrative)</h3>
+        {{ wave_svg|safe }}
+        {% if tran_summary %}
+        <p class="note">
+          Vin ≈ {{ "%.3f"|format(tran_summary.vin_pp) }} Vpp ·
+          Vout ≈ {{ "%.3f"|format(tran_summary.vout_pp) }} Vpp ·
+          {{ tran_summary.points }} points.
+        </p>
+        {% endif %}
+      </article>
+    </div>
+    <p class="note">
+      “Illustrative” means teaching-oriented plots drawn by Python from the same ngspice
+      run, not hand-drawn curves. (กราฟเพื่อการสอนที่สร้างจากผล ngspice จริง ไม่ใช่เส้นที่วาดขึ้นเอง)
+    </p>
+  </section>
+
+  <section class="card sim-card sim-block" id="engineering-results">
+    <h2><span class="sim-block-index">3</span> Engineering Results</h2>
+    <div class="sim-result-grid">
+      <article class="sim-result">
+        <h3>DC Operating Point</h3>
+        {% if dc_values %}
+        <table class="sim-table">
+          <thead><tr><th>VB</th><th>VE</th><th>VC</th><th>VCE</th></tr></thead>
+          <tbody><tr>
+            <td class="val">{{ "%.3f"|format(dc_values.vb) }} V</td>
+            <td class="val">{{ "%.3f"|format(dc_values.ve) }} V</td>
+            <td class="val">{{ "%.3f"|format(dc_values.vc) }} V</td>
+            <td class="val"><strong>{{ "%.3f"|format(dc_values.vce) }} V</strong></td>
+          </tr></tbody>
+        </table>
+        {% else %}
+        <p class="sim-placeholder">Run simulation to see VB · VE · VC · VCE.
+          (กดรันเพื่อดูค่าจุดทำงาน)</p>
+        {% endif %}
+      </article>
+
+      <article class="sim-result">
+        <h3>AC Frequency Response</h3>
+        {% if ac_summary %}
+        <table class="sim-table">
+          <thead><tr><th>Frequency</th><th>Gain</th><th>Phase</th></tr></thead>
+          <tbody><tr>
+            <td class="val">{{ "%.0f"|format(ac_summary.freq_1k_hz) }} Hz</td>
+            <td class="val">{{ "%.2f"|format(ac_summary.gain_1k_db) }} dB</td>
+            <td class="val">{{ "%.1f"|format(ac_summary.phase_1k_deg) }}°</td>
+          </tr></tbody>
+        </table>
+        <p class="note">Sweep point nearest to 1 kHz. (จุดที่ความถี่ใกล้ 1 kHz ที่สุด)</p>
+        {% else %}
+        <p class="sim-placeholder">Run simulation to see Gain / Phase / Frequency.
+          (กดรันเพื่อดู Gain / Phase / Frequency)</p>
+        {% endif %}
+      </article>
+
+      <article class="sim-result">
+        <h3>Transient Response</h3>
+        {% if tran_summary %}
+        <table class="sim-table">
+          <thead><tr><th>Vin</th><th>Vout</th><th>Time</th></tr></thead>
+          <tbody><tr>
+            <td class="val">{{ "%.3f"|format(tran_summary.vin) }} V</td>
+            <td class="val">{{ "%.3f"|format(tran_summary.vout) }} V</td>
+            <td class="val">{{ "%.3f"|format(tran_summary.time_ms) }} ms</td>
+          </tr></tbody>
+        </table>
+        <p class="note">Sampled at the positive Vin peak. (อ่านที่จุด Vin สูงสุดด้านบวก)</p>
+        {% else %}
+        <p class="sim-placeholder">Run simulation to see Vin / Vout / Time.
+          (กดรันเพื่อดู Vin / Vout / Time)</p>
+        {% endif %}
+      </article>
+    </div>
+  </section>
+</div>
+
+<footer>ENG29 2121 · Lab 04 · Results generated by ngspice + server-rendered SVG
+  (ไม่มี JavaScript ในหน้านี้)</footer>
+</body>
+</html>

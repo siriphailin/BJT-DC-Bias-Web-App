@@ -5,7 +5,9 @@
 
 ## 1. ขอบเขตของโปรเจกต์
 
-งานนี้เป็น **DC Bias ของ BJT แบบ Common Emitter สามโหมด** (Lab 03, ENG29 2121)
+งานนี้คือ **Flask Web App เดิมของ Lab 03 + Lab 04 Amplifier Simulator v1** (ENG29 2121)
+
+**Lab 03 — DC Bias 3 โหมด (ห้ามลบ ห้ามแก้สมการ)**
 
 | โหมด | ตัวต้านทานที่ใช้ | ฟังก์ชันใน `dc_bias.py` |
 |---|---|---|
@@ -13,9 +15,13 @@
 | Emitter Bias (แหล่งจ่ายเดียว) | RB, RC, RE | `calculate_emitter_bias()` |
 | Voltage Divider Bias | R1, R2, RC, RE | `calculate_dc_bias()` |
 
-- ✅ ทำได้: คำนวณ DC bias ทั้งสามโหมด, validation, warning, แผนภาพวงจรตามโหมด, test, เอกสาร
-- ❌ ห้ามเพิ่ม: AC analysis, small-signal, gain, Bode plot, transient, SPICE/ngspice,
-  signal generator, load line, FET หรือวงจรไบอัสแบบอื่นนอกสามโหมดนี้
+**Lab 04 — SPICE เฉพาะ CE Voltage Divider อ้างอิง 1 วงจร ผ่าน `spice_engine.py`**
+
+- ✅ ทำได้: DC bias 3 โหมดเดิม, validation/warning/test เดิม, และ `.op/.ac/.tran`
+  ของวงจรขยาย CE อ้างอิงด้วย ngspice จริง + กราฟ SVG ที่ render จากข้อมูลจริง
+- ❌ ห้ามเพิ่ม: circuit editor, SPICE ของ Fixed/Emitter Bias, emitter bypass capacitor,
+  Animated overlay, FET, การเขียน SPICE solver เอง, deploy ภายนอก
+- ❌ ห้ามใช้ผล analytical แทนผล SPICE หรือเรียกผล mock ว่า "success"
 
 ถ้าโจทย์ใหม่จะพาออกนอกขอบเขตนี้ ให้ถามมนุษย์ก่อนเสมอ
 
@@ -35,17 +41,28 @@
    จึงไม่เพิ่ม `unittest` ใหม่ในรอบนี้ — งานหลังจากนี้ให้กลับมาทำตามกฎนี้ตามปกติ
 6. **เพิ่มโหมดใหม่ได้ที่ `MODES` ใน `app.py` เท่านั้น** — ต้องประกาศรายการตัวต้านทานที่โหมดนั้น
    ใช้จริง แล้วให้ route เลือกฟังก์ชันใน `dc_bias.py` — ห้ามเขียนสมการใน `app.py` หรือ template
+7. **`spice_engine.py` ห้าม `import flask`** — รับเฉพาะค่าที่ validate แล้ว, เป็น adapter
+   บริสุทธิ์ที่คืน `SimResult` ให้ `app.py` เป็นคน render
+8. **ห้าม `shell=True` / ห้ามต่อข้อความจากฟอร์มเข้า netlist โดยตรง** — ทุกค่าต้องผ่าน
+   `_fmt()` และ command ต้องเป็น list; engine ต้องเป็น `ngspice_con.exe` (ไม่ใช่ GUI `ngspice.exe`)
+9. **ห้ามฮาร์ดโค้ดผล ngspice/กราฟใน template** — ต้องมาจาก `SimResult` เสมอ;
+   ทุก error ต้องล้างผลเก่าออก (`result=None`) และห้ามโชว์ "SUCCESS" ปลอม
+10. **ผล SPICE กับผล `dc_bias.py` ต้องมีป้ายแยกกันเสมอ** — ผล analytical
+   ต้องระบุว่า `NOT a SPICE result` พร้อมสมมติฐาน (β/VBE คงที่, ไม่มี Early effect)
 
 ## 3. เครื่องมือและคำสั่ง
 
 | งาน | คำสั่ง |
 |---|---|
-| ติดตั้ง | `python -m venv .venv` แล้ว `pip install -r requirements.txt` |
-| รัน | `python -m flask --app app run --debug` |
-| ทดสอบ | `python -m unittest discover -s tests -v` |
+| ติดตั้ง | `"C:\Program Files\Python314\python.exe" -m pip install -r requirements.txt` |
+| รัน | `"C:\Program Files\Python314\python.exe" -m flask --app app run --debug` |
+| ทดสอบ | `"C:\Program Files\Python314\python.exe" -m unittest discover -s tests -v` |
+| SPICE engine | `%LOCALAPPDATA%\Programs\ngspice-47\Spice64\bin\ngspice_con.exe` (ngspice-47) |
 
 - ใช้ **`unittest`** เท่านั้น (ไม่ใช้ pytest) เพราะเป็นสิ่งที่หลักสูตรกำหนด
-- Python 3.12, Flask 3.x — **ห้ามเพิ่ม dependency ใหม่** โดยไม่ถามมนุษย์ก่อน
+- Python 3.14, Flask 3.x — **ห้ามเพิ่ม dependency ใหม่** โดยไม่ถามมนุษย์ก่อน
+- `python` บน PATH เป็น Microsoft Store alias (ใช้ไม่ได้) → ใช้ path เต็มด้านบนเสมอ
+- ngspice ต้องเรียกแบบ console (`ngspice_con.exe`); ตัว `ngspice.exe` เป็น GUI ไม่คืน output
 
 ## 4. สไตล์โค้ด
 

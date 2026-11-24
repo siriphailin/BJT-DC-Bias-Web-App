@@ -1,7 +1,7 @@
-# Validation — BJT DC Bias (Common Emitter, Voltage Divider)
+# Validation — BJT DC Bias + Lab 04 CE Amplifier Simulator
 
-เอกสารนี้สรุปสมมติฐาน, สมการที่ใช้, การคำนวณมือทีละขั้น, ค่าอ้างอิง และกรณีที่แบบจำลองใช้ไม่ได้
-เพื่อแสดงว่าค่าที่เว็บคำนวณนั้นเชื่อถือได้
+เอกสารนี้สรุปสมมติฐาน, สมการที่ใช้, การคำนวณมือทีละขั้น, ค่าอ้างอิง, ผล ngspice จริง
+และหลักฐานการตรวจ B1–B8 เพื่อแสดงว่าค่าที่เว็บแสดงนั้นเชื่อถือได้
 
 ## 1. สมมติฐานของแบบจำลอง (Forward-Active Approximation)
 
@@ -155,7 +155,7 @@ VCE = 9.29431 − 1.24216  = 8.05216 V
 ## 7. วิธีตรวจซ้ำด้วยตัวเอง
 
 ```bash
-# รันชุดทดสอบทั้งหมด (20 ตัว)
+# รันชุดทดสอบทั้งหมด (54 ตัว: Lab 03 20 + Lab 04 34)
 python -m unittest discover -s tests -v
 
 # ตรวจค่าตัวอย่างจากใบงานด้วยมือ
@@ -400,4 +400,162 @@ A1 ถูกบันทึกไว้ **ก่อน** แก้โค้ด (
 `vce_sat` ใน context processor เงื่อนไข `IB ≤ 0` ถูกครอบด้วยการตรวจ Cutoff (`VTH <= VBE` → `IB = 0`)
 ที่มีอยู่แล้ว ไม่กระทบกรณี A1–A5 เพราะทุกกรณีมี VCE มากกว่า 8 V และชุดทดสอบเดิม 20 ตัวยังผ่านทั้งหมด
 (เอกสารวางแผนของ Lab 2 ใน `docs/superpowers/` ยังบันทึกค่า 0.3 ตามประวัติการตัดสินใจครั้งนั้น)
+
+---
+
+## 9. Lab 04 — BJT CE Amplifier Simulator (redesigned 3 blocks)
+
+### 9.1 สภาพแวดล้อมที่ตรวจจริง (2026-11-24)
+
+| รายการ | ค่าจริง | หมายเหตุ |
+|---|---|---|
+| Python | `C:\Program Files\Python314\python.exe` → **3.14.2** | `python` บน PATH เป็น Store alias ใช้ไม่ได้ |
+| Flask | **3.1.3** (user site) | `pip install -r requirements.txt` สำเร็จ |
+| Baseline test | `Ran 20 tests ... OK` | ชุดเดิม Lab 03 ยังผ่าน |
+| git | `C:\Users\B6837020\AppData\Local\Programs\Git\cmd\git.exe` | ไม่มีบน PATH |
+| engine | `C:\Users\B6837020\AppData\Local\Programs\ngspice-47\Spice64\bin\ngspice_con.exe` | **console binary** |
+| engine version | `** ngspice-47 : Circuit level simulation program **` | จาก `ngspice_con.exe -v` |
+| source | Chocolatey nupkg `ngspice/47.0.0` (13.8 MB), แตกด้วย `tar -xf` | winget ไม่มีแพ็กเกจ; SourceForge เจอ Cloudflare |
+| Node.js | **v26.13.1** / npx **11.20.0** | zip binary ใน `%LOCALAPPDATA%\Programs\node-v26.13.1-win-x64` (winget ต้อง UAC → ถูกยกเลิก exit 1602) |
+| Impeccable | engine **v0.1.27** ติดตั้งใน `.opencode` (project scope, provider opencode) | `npx impeccable install --yes --providers=opencode --scope=project`; ใช้จริงใน Task 5 |
+
+**ทำไมต้อง `ngspice_con.exe` ไม่ใช้ `ngspice.exe`:** ตัวหลังเป็น GUI subsystem
+รันแล้วไม่คืน stdout ให้ `subprocess` (ทดสอบแล้วได้ output ว่าง)
+
+### 9.2 ผล smoke test กับ ngspice-47 จริง (ก่อนเขียน parser)
+
+Netlist อ้างอิง: `VCC=12 V`, `R1=100 kΩ`, `R2=22 kΩ`, `RC=2.2 kΩ`, `RE=1 kΩ`,
+`CIN=COUT=10 µF`, `RL=10 kΩ`, `VIN AC 1 SIN(0 10m 1k)`, model `QNPN` ตาม spec
+
+**DC (`.op`)** — ตารางจาก `.print op`:
+
+```
+Index   v(base)         v(col)          v(emi)          vic#branch
+0       1.949112e+00    9.189410e+00    1.289454e+00    1.277541e-03
+```
+
+→ `VB=1.9491 V`, `VE=1.2895 V`, `VC=9.1894 V`, `VCE=7.9000 V`, `IC=1.2775 mA`
+เทียบ analytical (`VBE=0.70`, ไม่มี Early effect): `VB=1.9422 V`, `VE=1.2422 V`,
+`VC=9.2943 V`, `VCE=8.0522 V`, `IC=1.2299 mA` → **ต่างกันจริง** เพราะ SPICE ใช้
+`VBE≈0.6597 V` จาก diode equation + Early effect → ต้องแยกป้ายเสมอ
+
+**AC (`.ac dec 20 1 1Meg`)** ที่ 1 kHz:
+
+```
+frequency   vdb(vout)   vp(vout)
+1.000000e+03  4.859789e+00  -3.139260e+00     ← vp เป็น radian ≈ -179.9°
+frequency   vdb(vin)    vp(vin)
+1.000000e+03  0.000000e+00   0.000000e+00
+```
+
+→ gain ≈ **+4.86 dB** (≈1.75×), phase ≈ **−180°** (กลับเฟสตาม CE)
+
+**Transient (`.tran 10u 5m 0 10u`)** ตัวอย่างแถวแรก:
+
+```
+0    0.000000e+00  0.000000e+00  0.000000e+00
+1    1.000000e-07  6.283185e-06 -3.409260e-05
+...
+32   2.528000e-04  9.998452e-03 -1.747790e-02
+```
+
+→ time step ไม่สม่ำเสมอ (adaptive 1e-7 → 1e-5) และ `Vout` ติดลบเมื่อ `Vin` บวก
+ยืนยันการกลับเฟส
+
+### 9.3 ข้อควรระวังที่ค้นพบจากการรันจริง (ต้องใส่ในโค้ด)
+
+1. ห้ามส่ง `-r` — ngspice จะแจ้ง `print line ignored since rawfile was produced`
+2. ห้ามเขียน `.print ac freq ...` — `can't parse 'freq'`; frequency เป็น column อัตโนมัติ
+3. `.tran` ต้องมี TSTEP > 0 — `.tran 0 tstop 0 tstep` ทำให้ `TSTEP is invalid`
+4. `vp()` เป็น **radian** → ต้อง `degrees()` ก่อนแสดงผล
+5. title ใน netlist ใช้ ASCII — `—` ถูกแปลงเป็น `?` ใน log
+6. parser ต้องข้าม `Index`/form feed/หัวตารางที่ซ้ำทุก ~60 แถว
+
+### 9.4 วิธีตรวจ B1–B8 ที่ใช้จริง
+
+| รายการ | วิธีจริง | หมายเหตุ |
+|---|---|---|
+| Playwright MCP | **NOT RUN** | โปรเจกต์นี้ไม่ได้ตั้งค่า Playwright MCP server ใน `opencode.json` |
+| OpenCode Browser | **ใช้จริงทุกเคส B1–B7** | เปิด Flask จริงที่ `http://127.0.0.1:5000` (และ port 5001 สำหรับจำลอง engine หาย) ใช้ `tabs.open`, `navigate`, `evaluate`, `wait`, `network.list` อ่านค่าจาก DOM ที่ render แล้ว ไม่ได้อ่านจากโค้ด |
+| Impeccable CLI | **ใช้จริง B8** | `impeccable shot` ที่ viewport 1280×900 และ 390×844; `impeccable detect` บน URL จริง |
+| Manual | ไม่ได้ใช้ในรอบนี้ | นักศึกษาควรทวน B3 หรือ B6 ด้วยมือหนึ่งรอบตามที่ใบงานกำหนด |
+
+> Browser harness ที่ใช้โต้ตอบจริงมี viewport **532×840** จึงไม่ได้อ้างว่ากดทดสอบบนหน้าจอ 390 px
+> แบบ touch จริง — 390 px เป็นหลักฐานจาก Impeccable headless render เท่านั้น
+> Fresh tab ที่ `/simulator` ตรวจ console level=error แล้วได้รายการว่าง และ DOM มี `<script>` จำนวน 0
+
+### 9.5 ตาราง B1–B8 (ผลจริงหลัง redesign — ตรวจซ้ำ 2026-11-24)
+
+หน้า `/simulator` หลัง redesign มีบล็อกเกริ่นนำบนสุด `CE Amplifier Lab: DC Bias / AC / Transient`
+แล้วตามด้วย `<h2>` ลำดับ `1 Circuit & Parameters`, `2 Simulation & Plots`, `3 Engineering Results`
+ไม่มีข้อความ `NOT a SPICE result` และไม่มี `Netlist & engine log` อีกต่อไป
+DOM มี `<script>` จำนวน **0** และ console level=error ว่างทุกครั้งที่ตรวจ
+ค่าคงที่เริ่มต้น: `VCC=12 V`, `R1=100 kΩ`, `R2=22 kΩ`, `RC=2.2 kΩ`, `RE=1 kΩ`,
+`RL=10 kΩ`, `amplitude=10 mV peak`, `frequency=1 kHz`; model `QNPN` แบบ teaching-only
+กด Run ครั้งเดียวรัน `.op/.ac/.tran` จริงแล้ว render 3 ตาราง + 2 กราฟพร้อมกัน
+
+| Case | Method | Input | Expected | Observed | Evidence | Status |
+|---|---|---|---|---|---|---|
+| B1 regression `/` | OpenCode Browser | Divider/Fixed/Emitter ชุด A1–A3 เดิม | ค่าเดิมไม่เปลี่ยน | Divider **IC 1.230 mA · VCE 8.052 V**; Fixed **1.130 mA · 9.514 V**; Emitter **1.026 mA · 8.705 V** | `wait()` เจอ `Forward Active` ทุกโหมด; 20 test เดิมยังผ่าน; console errors ว่าง | **PASS** |
+| B2 default run | OpenCode Browser | ค่าคงที่ด้านบน, กด `Run simulation` ครั้งเดียว | 3 blocks, 2 plots, 3 tables, success status | `SUCCESS` + `Engine: ngspice-47`; DC **VB 1.949 V · VE 1.289 V · VC 9.189 V · VCE 7.900 V**; AC **1000 Hz · 4.86 dB · −179.9°**; Tran **0.010 V · −0.017 V · 0.253 ms**; `<polyline>` รวม 4; `<script>` 0 | `h2` ตรงตามลำดับ; `Bode response (illustrative)` + `Input/Output waveforms (illustrative)`; radio `dc` checked และมี active tab เดียว | **PASS** |
+| B3 แก้ resistor | OpenCode Browser | `RE=2 kΩ` (unit `kohm`) แล้วรัน | ค่า/กราฟเปลี่ยนตาม RE | AC note เปลี่ยนเป็น `Peak ≈ −1.14 dB · @1000 Hz = −1.14 dB / −179.9° · 121 points`; ตาราง DC/AC/Tran ยังครบ 3 | เปรียบเทียบ `polyline.points` และข้อความ note ก่อน/หลัง; schematic แสดงเฉพาะชื่ออุปกรณ์ (ไม่มีตัวเลข) | **PASS** |
+| B4 AC Bode | OpenCode Browser | `.ac dec 20 1 1Meg` จากการรันเดียว | gain dB + phase มีหน่วย, ไม่มี JS | @1 kHz **4.86 dB / −179.9°**, **121 points**; กราฟ `Bode response (illustrative)` มี `<polyline>` 2; note ระบุ `Peak ≈ 4.86 dB` | axes `Frequency (Hz)`, `Gain (dB)`, `Phase (deg)`; `<script>` 0 | **PASS** |
+| B5 Transient | OpenCode Browser | 10 mV, 1 kHz จากการรันเดียว | Vin/Vout ตามเวลา และกลับเฟส | กราฟ `Input/Output waveforms (illustrative)` มี `<polyline>` 2, **508 points**, note `Vin ≈ 0.020 Vpp · Vout ≈ 0.035 Vpp`; ตาราง `Vin / Vout / Time` = `0.010 V · −0.017 V · 0.253 ms` | ตรวจ legend และ `points` ของทั้งสอง series | **PASS** |
+| B6 แก้ RL/source | OpenCode Browser | `RL=4.7 kΩ`, `amplitude=0.02 V`, `frequency=2000 Hz` แล้วรัน | netlist/results เปลี่ยน | AC **3.25 dB / −179.8°**; Tran **0.020 V / −0.029 V / 0.126 ms**; ช่องฟอร์มยังเก็บค่าใหม่ | เปรียบเทียบตาราง/กราฟกับรอบเริ่มต้น; ยืนยัน editable end-to-end (สัญลักษณ์ไม่แสดงตัวเลขตามข้อกำหนด no-JS) | **PASS** |
+| B7 error | OpenCode Browser | `RE=0`; อีก port ตั้ง `NGSPICE_ENGINE=missing-engine.exe` | 400 หรือ status error ไม่ค้างผลเก่า | `POST /simulate` ตอบ **400** พร้อม `RE must be greater than 0 Ω`, ไม่มี `SUCCESS`, ไม่มี `1.949`, ตาราง 0; engine หายแสดง **ENGINE_NOT_FOUND**, ไม่มี `SUCCESS`/`1.949`, ตาราง 0, `<polyline>` 0, มี `What to try` | `network.list` เห็น status 400; ตรวจ `document.body.innerText` หลัง error | **PASS** |
+| B8 responsive | Impeccable CLI | 1280×900 + 390×844 | ปุ่ม/กราฟไม่ตัด | screenshot ทั้งสองขนาดถูกสร้างจริง; `detect` เหลือเฉพาะ advisory/warning (`straggler`, `nested-cards`) ไม่มี overflow; `.sim-groups/.sim-tabs` collapse บนจอแคบ | [`lab04-redesign-desktop-1280x900.png`](screenshots/lab04-redesign-desktop-1280x900.png), [`lab04-redesign-phone-390x844.png`](screenshots/lab04-redesign-phone-390x844.png) | **PASS (render)** |
+
+หลักฐานเพิ่มเติมจาก browser จริง:
+
+- schematic ใหม่เป็น **BJT voltage-divider common-emitter** (`title` =
+  `BJT voltage-divider common-emitter amplifier schematic`) มีสัญลักษณ์ NPN **ในวงกลมเล็ก**
+  (`<circle cx="400" cy="170" r="34">`), ตัวต้านทานทั้ง 5 ตัวเป็น **กล่องอิมพิแดนซ์** (`<rect>`)
+  แทนเส้นหยัก, มีลูกศรขึ้นที่สัญลักษณ์ Vin (`M70 151 L75 159 L65 159 Z`),
+  R1/R2 divider, RC, RE, CIN/COUT, RL **แสดงเฉพาะชื่ออุปกรณ์ ไม่มีตัวเลขกำกับ**
+- rail VCC ถูกตัดให้เชื่อมเฉพาะ node บน R1 → node บน RC
+  (`<line x1="250" y1="40" x2="450" y2="40"/>`) ไม่ยาวข้ามทั้งภาพ; browser ยืนยัน DOM ตรงตามนี้
+- **ไม่มีตัวเลขบนสัญลักษณ์**: เพราะข้อกำหนดห้ามใช้ JavaScript ฝั่ง client การอัปเดตตัวเลขทุกครั้งที่พิมพ์
+  ทำไม่ได้ จึงลบ `<g class="sim-value">` ออก เหลือเฉพาะชื่อ `VCC/VIN/R1/R2/RC/RE/RL/CIN/COUT/B/C/E/Q1`;
+  ค่าที่กรอกอยู่ในฟอร์มและมีผลกับ netlist/ผลลัพธ์หลังกด Run ตามปกติ
+- บล็อก Simulation แสดง path ที่ตรวจพบจริง:
+  `Engine detected on this machine: C:\Users\B6837020\AppData\Local\Programs\ngspice-47\Spice64\bin\ngspice_con.exe`
+  (ค้นจาก PATH + โฟลเดอร์ติดตั้งที่พบบ่อย; `find_ngspice_engine()`)
+- กด radio `tran` แล้ว checked เปลี่ยนเป็น `tran`, active tab เดียวคือ `Transient waveform`,
+  ค่าฟอร์ม (`vcc=12`, `rl=10`, `amplitude=10`, `frequency=1`) ไม่เปลี่ยน และหลังรันตารางยังครบ
+  3 + `<polyline>` 4 → radio เป็น focus เท่านั้น ไม่ reload/ล้างผล
+- ชุดทดสอบหลัง redesign: **`Ran 62 tests ... OK`** (เพิ่ม test ตรวจบล็อกเกริ่นนำบนสุด + ชื่อ `Circuit & Parameters` เดิม, กล่องอิมพิแดนซ์, วงกลม BJT, ลูกศร Vin, rail VCC สั้น และไม่มีตัวเลขบนสัญลักษณ์)
+
+หลักฐานภาพจาก browser/CLI จริง (หลัง redesign):
+
+| ไฟล์ | เนื้อหา |
+|---|---|
+| [`screenshots/lab04-redesign-desktop-1280x900.png`](screenshots/lab04-redesign-desktop-1280x900.png) | `/simulator` 1280×900: 3 blocks, schematic ใหม่, engine path, 2 plots, 3 tables |
+| [`screenshots/lab04-redesign-phone-390x844.png`](screenshots/lab04-redesign-phone-390x844.png) | `/simulator` 390×844: layout collapse บนจอแคบ |
+
+ข้อความที่คัดจากหน้าเว็บจริง (ไม่ใช่จากโค้ด):
+
+```text
+SUCCESS  Engine: ngspice-47
+DC Operating Point    VB 1.949 V · VE 1.289 V · VC 9.189 V · VCE 7.900 V
+AC Frequency Response 1000 Hz · 4.86 dB · -179.9°
+Transient Response    0.010 V · -0.017 V · 0.253 ms
+Bode response (illustrative)        Peak ≈ 4.86 dB · @1000 Hz = 4.86 dB / -179.9° · 121 points.
+Input/Output waveforms (illustrative) Vin ≈ 0.020 Vpp · Vout ≈ 0.035 Vpp · 508 points.
+Engine detected on this machine: C:\Users\B6837020\AppData\Local\Programs\ngspice-47\Spice64\bin\ngspice_con.exe
+
+B7  ENGINE_NOT_FOUND → Engine not ready — NGspice executable not found
+    What to try: ... (ไม่มี SUCCESS, ไม่มีค่าเก่า, ไม่มีตาราง/กราฟค้าง)
+```
+
+### 9.6 Impeccable critique → polish → redesign → detect
+
+| ขั้น | สิ่งที่ทำจริง | หลักฐาน |
+|---|---|---|
+| Critique (layout เดิม) | รัน Assessment A (design review) และ Assessment B (detector + screenshot) แบบแยก sub-agent ตาม reference ของ Impeccable v0.1.27 | A: Nielsen 25/40, cognitive load สูง, 3 P1 (tab reset, ไม่มี schematic, AC caveat/cutoff ไม่ชัด); B: detector 4 findings ใน markup scan |
+| Polish (layout เดิม) | tab เปลี่ยนจาก `<a href>` เป็น `<button formmethod="get">`; `GET /simulator` อ่านค่าจาก query; เพิ่ม schematic; range hint; remedy ของ engine หาย | 15/20 Good; `.impeccable/audit/2026-11-24T08-45-44Z__project.md` (รายงาน nàyอธิบาย **ก่อน redesign** เท่านั้น) |
+| Redesign (รอบปัจจุบัน) | เปลี่ยนเป็น 3 blocks ตามที่ผู้ขอระบุ; radio `DC/AC/Transient` แทน GET-tab; run ครั้งเดียวได้ 3 analysis; ตัด analytical + netlist/log; เพิ่ม `RL`, source units, schematic voltage-divider ใหม่, แสดง engine path | `app.py`, `spice_engine.py`, `templates/simulator.html`, `static/style.css`, tests; 62 tests ผ่าน; browser ตรวจ B1–B7 ใหม่ |
+| Detect (หลัง redesign) | `impeccable detect --json http://127.0.0.1:5000/simulator` และ `shot --viewport 1280x900,390x844` | เหลือ advisory/warning (`straggler`, `em-dash-overuse`, `nested-cards`) ไม่มี primary finding เรื่อง overflow หรือ tap target; screenshot ใหม่สองไฟล์ในตาราง 9.5 |
+
+> ข้อมูลในหัวข้อ 9.2–9.3 เป็น **result จาก ngspice จริง** ที่ใช้ validate parser ส่วนหัวข้อ 9.5
+> เป็นหลักฐานจาก UI จริงหลังรันโปรแกรมแล้ว
 
